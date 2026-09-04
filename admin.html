@@ -1,10 +1,232 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard Admin — Reborn Futsal Academy</title><link rel="stylesheet" href="style.css"></head>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Admin - Reborn Futsal Academy</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
 <body class="admin-page">
-<aside class="sidebar"><a class="brand" href="index.html"><span class="brand-mark">RFA</span><span><strong>Reborn</strong><small>Futsal Academy</small></span></a><div class="side-nav"><a class="selected">📊 Dashboard</a><a>👥 Pemain</a><a>📅 Jadwal Latihan</a><a>✅ Absensi</a><a>🏆 Turnamen</a><a>📝 Pendaftaran</a><a>⚙️ Pengaturan</a></div><button class="logout" onclick="logout()">Keluar</button></aside>
-<main class="admin-main"><header class="admin-header"><div><span class="eyebrow">ADMINISTRATOR</span><h1>Dashboard</h1><p class="muted">Selamat datang di pusat pengelolaan Reborn Futsal Academy.</p></div><a class="btn secondary" href="index.html">Lihat Website</a></header>
-<div class="admin-stats"><div class="stat-card"><span>Total Pemain</span><strong>32</strong><small>+4 bulan ini</small></div><div class="stat-card"><span>Latihan Aktif</span><strong>5</strong><small>2 minggu ini</small></div><div class="stat-card"><span>Kehadiran</span><strong>91%</strong><small>bulan berjalan</small></div><div class="stat-card"><span>Turnamen</span><strong>3</strong><small>mendatang</small></div></div>
-<div class="admin-grid"><section class="panel"><div class="panel-title"><h2>Pemain terbaru</h2><button class="btn primary small" onclick="alert('Form tambah pemain akan dihubungkan ke database Supabase.')">+ Tambah Pemain</button></div><div class="table-wrap"><table><thead><tr><th>Nama</th><th>Posisi</th><th>Program</th><th>Status</th></tr></thead><tbody><tr><td>Raka Pratama</td><td>Pivot</td><td>Senior</td><td><span class="status">Aktif</span></td></tr><tr><td>Fahmi Akbar</td><td>Flank</td><td>Junior</td><td><span class="status">Aktif</span></td></tr><tr><td>Rizky Maulana</td><td>Anchor</td><td>Senior</td><td><span class="status">Aktif</span></td></tr><tr><td>Bagas Putra</td><td>Goalkeeper</td><td>Junior</td><td><span class="status">Aktif</span></td></tr></tbody></table></div></section>
-<section class="panel"><h2>Agenda berikutnya</h2><div class="agenda"><div><b>12 SEP</b><span>Teknik & Finishing<br><small>19:00–21:00</small></span></div><div><b>14 SEP</b><span>Taktik Tim<br><small>19:00–21:00</small></span></div><div><b>20 SEP</b><span>Reborn Futsal Cup<br><small>Kompetisi</small></span></div></div></section></div>
-<section class="panel"><div class="panel-title"><h2>Struktur data pemain</h2><span class="muted">Siap untuk Supabase</span></div><div class="schema"><code>players</code><span>id • full_name • email • phone • birth_date • gender • position • jersey_number • program • join_date • status • photo_url • notes</span></div></section>
-</main><script>if(sessionStorage.getItem('rfa_admin')!=='1'){location.href='login.html'}function logout(){sessionStorage.removeItem('rfa_admin');location.href='login.html'}</script></body></html>
+
+  <aside class="admin-sidebar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">RFA</span>
+      <span>
+        <strong>Reborn</strong>
+        <small>Futsal Academy</small>
+      </span>
+    </a>
+
+    <nav>
+      <a href="admin.html" class="active">📊 Dashboard</a>
+      <a href="index.html">🌐 Website</a>
+    </nav>
+
+    <button class="btn primary full" onclick="logout()">
+      Logout
+    </button>
+  </aside>
+
+  <main class="admin-main">
+
+    <header class="admin-header">
+      <div>
+        <span class="eyebrow">ADMINISTRATOR</span>
+        <h1>Dashboard</h1>
+        <p class="muted">Kelola data pemain Reborn Futsal Academy.</p>
+      </div>
+    </header>
+
+    <section class="admin-stats">
+
+      <div class="stat-card">
+        <span>Total Pemain</span>
+        <strong id="totalPlayers">-</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Pendaftar Baru</span>
+        <strong id="newPlayers">-</strong>
+      </div>
+
+    </section>
+
+    <section class="panel">
+
+      <div class="panel-title">
+        <div>
+          <h2>Data Pendaftar</h2>
+          <p class="muted">Data diambil langsung dari Supabase.</p>
+        </div>
+
+        <button class="btn primary small" onclick="loadPlayers()">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <div id="loading" class="muted">
+        Memuat data...
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>WhatsApp</th>
+              <th>Program</th>
+              <th>Tanggal Daftar</th>
+            </tr>
+          </thead>
+
+          <tbody id="playersTable">
+          </tbody>
+        </table>
+      </div>
+
+      <p id="message" class="form-note"></p>
+
+    </section>
+
+  </main>
+
+<script>
+const SUPABASE_URL = 'https://txgwdcxsmgclbgbxdbsf.supabase.co';
+
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_g3Tsr8PRmwhGvFcGGJOuOg_0R6zCrr6';
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+
+/* =========================
+   CEK LOGIN
+========================= */
+
+async function checkAuth() {
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================
+   LOAD DATA PEMAIN
+========================= */
+
+async function loadPlayers() {
+
+  const loading = document.getElementById('loading');
+  const table = document.getElementById('playersTable');
+  const message = document.getElementById('message');
+
+  loading.textContent = 'Memuat data...';
+  table.innerHTML = '';
+  message.textContent = '';
+
+  const { data, error } = await supabaseClient
+    .from('players')
+    .select('full_name, phone, program, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+
+    loading.textContent = '';
+
+    message.textContent =
+      'Gagal mengambil data: ' + error.message;
+
+    return;
+  }
+
+  loading.textContent = '';
+
+  document.getElementById('totalPlayers').textContent =
+    data.length;
+
+  document.getElementById('newPlayers').textContent =
+    data.length;
+
+  if (data.length === 0) {
+
+    table.innerHTML =
+      '<tr><td colspan="4">Belum ada data pendaftar.</td></tr>';
+
+    return;
+  }
+
+  data.forEach(player => {
+
+    const row = document.createElement('tr');
+
+    const date = player.created_at
+      ? new Date(player.created_at).toLocaleDateString('id-ID')
+      : '-';
+
+    row.innerHTML = `
+      <td>${escapeHtml(player.full_name || '-')}</td>
+      <td>${escapeHtml(player.phone || '-')}</td>
+      <td>${escapeHtml(player.program || '-')}</td>
+      <td>${date}</td>
+    `;
+
+    table.appendChild(row);
+  });
+}
+
+
+/* =========================
+   CEGAH HTML INJECTION
+========================= */
+
+function escapeHtml(value) {
+
+  const div = document.createElement('div');
+
+  div.textContent = value;
+
+  return div.innerHTML;
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  window.location.href = 'login.html';
+}
+
+
+/* =========================
+   JALANKAN
+========================= */
+
+(async function () {
+
+  const authenticated = await checkAuth();
+
+  if (authenticated) {
+    await loadPlayers();
+  }
+
+})();
+</script>
+
+</body>
+</html>
