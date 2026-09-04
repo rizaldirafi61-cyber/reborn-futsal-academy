@@ -1,3 +1,104 @@
 <!doctype html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login — Reborn Futsal Academy</title><link rel="stylesheet" href="style.css"></head>
-<body class="auth-page"><a class="back" href="index.html">← Kembali ke website</a><div class="auth-card"><div class="brand center"><span class="brand-mark">RFA</span><span><strong>Reborn</strong><small>Futsal Academy</small></span></div><h1>Selamat datang kembali</h1><p class="muted">Masuk ke portal Reborn Futsal Academy</p><form onsubmit="login(event)"><label>Email</label><input id="email" type="email" required placeholder="admin@rebornfutsal.id"><label>Password</label><input id="password" type="password" required placeholder="Password"><button class="btn primary full">Masuk</button></form><div class="demo">Demo sementara<br><b>Email:</b> admin@rebornfutsal.id<br><b>Password:</b> admin123</div><a class="text-link" href="index.html">← Kembali ke beranda</a></div><script>function login(e){e.preventDefault();let em=document.getElementById('email').value, pw=document.getElementById('password').value;if(em==='admin@rebornfutsal.id'&&pw==='admin123'){sessionStorage.setItem('rfa_admin','1');location.href='admin.html'}else alert('Login demo salah. Gunakan akun demo yang ditampilkan.')}</script></body></html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login Admin - Reborn Futsal Academy</title>
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="auth-page">
+
+  <a class="back" href="index.html">← Kembali ke website</a>
+
+  <div class="auth-card">
+
+    <div class="brand center">
+      <span class="brand-mark">RFA</span>
+      <span>
+        <strong>Reborn</strong>
+        <small>Futsal Academy</small>
+      </span>
+    </div>
+
+    <h1>Login Admin</h1>
+    <p class="auth-subtitle">
+      Masuk untuk mengelola data pemain Reborn Futsal Academy.
+    </p>
+
+    <form id="loginForm">
+
+      <label for="email">Email Admin</label>
+      <input
+        id="email"
+        type="email"
+        placeholder="admin@email.com"
+        required
+        autocomplete="email"
+      >
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Masukkan password"
+        required
+        autocomplete="current-password"
+      >
+
+      <button class="btn primary full" type="submit">
+        Login Admin →
+      </button>
+
+      <p id="loginMessage" class="form-note"></p>
+
+    </form>
+
+  </div>
+
+<script>
+const SUPABASE_URL = 'https://txgwdcxsmgclbgbxdbsf.supabase.co';
+
+/*
+  Tempel Publishable Key Supabase Anda di bawah.
+  JANGAN gunakan Secret Key / service_role key.
+*/
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_g3Tsr8PRmwhGvFcGGJOuOg_0R6zCrr6';
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+const loginForm = document.getElementById('loginForm');
+const loginMessage = document.getElementById('loginMessage');
+
+loginForm.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  loginMessage.textContent = 'Sedang memproses...';
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    loginMessage.textContent =
+      'Login gagal. Email atau password salah.';
+    return;
+  }
+
+  if (data.session) {
+    window.location.href = 'admin.html';
+  }
+});
+</script>
+
+</body>
+</html>
