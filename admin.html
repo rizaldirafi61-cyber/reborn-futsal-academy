@@ -312,7 +312,7 @@ async function loadPlayers() {
 
   const { data, error } = await supabaseClient
     .from('players')
-    .select('full_name, phone, program, created_at')
+    .select('id, full_name, phone, program, position, jersey_number, birth_date, notes, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -349,13 +349,19 @@ async function loadPlayers() {
       ? new Date(player.created_at).toLocaleDateString('id-ID')
       : '-';
 
-    row.innerHTML = `
-      <td>${escapeHtml(player.full_name || '-')}</td>
-      <td>${escapeHtml(player.phone || '-')}</td>
-      <td>${escapeHtml(player.program || '-')}</td>
-      <td>${date}</td>
-    `;
-
+  row.innerHTML = `
+  <td>${escapeHtml(player.full_name || '-')}</td>
+  <td>${escapeHtml(player.phone || '-')}</td>
+  <td>${escapeHtml(player.program || '-')}</td>
+  <td>${date}</td>
+  <td>
+    <button
+      class="btn primary small"
+      onclick="editPlayer('${player.id}')">
+      Edit
+    </button>
+  </td>
+`;
     table.appendChild(row);
   });
 }
