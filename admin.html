@@ -56,16 +56,121 @@
     <section class="panel">
 
       <div class="panel-title">
-        <div>
-          <h2>Data Pendaftar</h2>
-          <p class="muted">Data diambil langsung dari Supabase.</p>
-        </div>
+  <div>
+    <h2>Data Pendaftar</h2>
+    <p class="muted">Data diambil langsung dari Supabase.</p>
+  </div>
 
-        <button class="btn primary small" onclick="loadPlayers()">
-          ↻ Refresh
-        </button>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn primary small" onclick="showAddPlayerForm()">
+      + Tambah Pemain
+    </button>
+
+    <button class="btn primary small" onclick="loadPlayers()">
+      ↻ Refresh
+    </button>
+  </div>
+</div>
+<div id="addPlayerForm" style="display:none; margin:20px 0; padding:20px; border:1px solid #ddd; border-radius:12px;">
+
+  <h3 style="margin-top:0;">Tambah Pemain</h3>
+
+  <form onsubmit="addPlayer(event)">
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px;">
+
+      <div>
+        <label for="playerName">Nama Lengkap</label>
+        <input
+          type="text"
+          id="playerName"
+          required
+          placeholder="Nama pemain"
+        >
       </div>
 
+      <div>
+        <label for="playerPhone">WhatsApp</label>
+        <input
+          type="text"
+          id="playerPhone"
+          required
+          placeholder="08xxxxxxxxxx"
+        >
+      </div>
+
+      <div>
+        <label for="playerProgram">Program</label>
+        <select id="playerProgram" required>
+          <option value="">Pilih program</option>
+          <option value="Junior">Junior</option>
+          <option value="Youth">Youth</option>
+          <option value="Senior">Senior</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="playerPosition">Posisi</label>
+        <select id="playerPosition">
+          <option value="">Pilih posisi</option>
+          <option value="Kiper">Kiper</option>
+          <option value="Anchor">Anchor</option>
+          <option value="Flank">Flank</option>
+          <option value="Pivot">Pivot</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="playerJersey">Nomor Jersey</label>
+        <input
+          type="number"
+          id="playerJersey"
+          min="1"
+          max="99"
+          placeholder="Contoh: 10"
+        >
+      </div>
+
+      <div>
+        <label for="playerBirthDate">Tanggal Lahir</label>
+        <input
+          type="date"
+          id="playerBirthDate"
+        >
+      </div>
+
+    </div>
+
+    <div style="margin-top:15px;">
+      <label for="playerNotes">Catatan</label>
+      <textarea
+        id="playerNotes"
+        rows="3"
+        placeholder="Catatan pemain (opsional)"
+      ></textarea>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:15px;">
+
+      <button type="submit" class="btn primary">
+        Simpan Pemain
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        onclick="hideAddPlayerForm()"
+      >
+        Batal
+      </button>
+
+    </div>
+
+    <p id="addPlayerMessage" class="form-note"></p>
+
+  </form>
+
+</div>
       <div id="loading" class="muted">
         Memuat data...
       </div>
@@ -140,7 +245,57 @@ async function checkAuth() {
   return true;
 }
 
+/* =========================
+   FORM TAMBAH PEMAIN
+========================= */
 
+function showAddPlayerForm() {
+  document.getElementById('addPlayerForm').style.display = 'block';
+  document.getElementById('playerName').focus();
+}
+
+function hideAddPlayerForm() {
+  document.getElementById('addPlayerForm').style.display = 'none';
+  document.getElementById('addPlayerMessage').textContent = '';
+}
+
+async function addPlayer(event) {
+
+  event.preventDefault();
+
+  const message = document.getElementById('addPlayerMessage');
+
+  message.textContent = 'Menyimpan data...';
+
+  const player = {
+    full_name: document.getElementById('playerName').value.trim(),
+    phone: document.getElementById('playerPhone').value.trim(),
+    program: document.getElementById('playerProgram').value,
+    position: document.getElementById('playerPosition').value || null,
+    jersey_number: document.getElementById('playerJersey').value
+      ? Number(document.getElementById('playerJersey').value)
+      : null,
+    birth_date: document.getElementById('playerBirthDate').value || null,
+    notes: document.getElementById('playerNotes').value.trim() || null
+  };
+
+  const { error } = await supabaseClient
+    .from('players')
+    .insert([player]);
+
+  if (error) {
+    message.textContent = 'Gagal menyimpan: ' + error.message;
+    return;
+  }
+
+  alert('Pemain berhasil ditambahkan.');
+
+  document.querySelector('#addPlayerForm form').reset();
+
+  hideAddPlayerForm();
+
+  await loadPlayers();
+}
 /* =========================
    LOAD DATA PEMAIN
 ========================= */
