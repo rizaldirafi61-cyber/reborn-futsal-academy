@@ -178,12 +178,13 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Nama</th>
-              <th>WhatsApp</th>
-              <th>Program</th>
-              <th>Tanggal Daftar</th>
-            </tr>
+           <tr>
+  <th>Nama</th>
+  <th>WhatsApp</th>
+  <th>Program</th>
+  <th>Tanggal Daftar</th>
+  <th>Aksi</th>
+</tr>
           </thead>
 
           <tbody id="playersTable">
@@ -335,9 +336,8 @@ async function loadPlayers() {
 
   if (data.length === 0) {
 
-    table.innerHTML =
-      '<tr><td colspan="4">Belum ada data pendaftar.</td></tr>';
-
+   table.innerHTML =
+  '<tr><td colspan="5">Belum ada data pendaftar.</td></tr>';
     return;
   }
 
@@ -349,7 +349,7 @@ async function loadPlayers() {
       ? new Date(player.created_at).toLocaleDateString('id-ID')
       : '-';
 
-  row.innerHTML = `
+row.innerHTML = `
   <td>${escapeHtml(player.full_name || '-')}</td>
   <td>${escapeHtml(player.phone || '-')}</td>
   <td>${escapeHtml(player.program || '-')}</td>
