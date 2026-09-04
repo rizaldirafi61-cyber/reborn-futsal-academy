@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reborn Futsal Academy</title>
 <link rel="stylesheet" href="style.css">
-</head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
 <body>
 
 <header class="topbar">
@@ -155,10 +155,41 @@
 </footer>
 
 <script>
-function registerDemo(e){
+const SUPABASE_URL = 'https://txgwdcxsmgclbgbxdbsf.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_g3Tsr8PRmwhGvFcGGJOuOg_0R6zCrr6';
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+async function registerDemo(e) {
   e.preventDefault();
-  alert('Pendaftaran demo berhasil. Database online akan diaktifkan pada tahap berikutnya.');
-  e.target.reset();
+
+  const form = e.target;
+  const inputs = form.querySelectorAll('input, select');
+
+  const full_name = inputs[0].value.trim();
+  const phone = inputs[1].value.trim();
+  const program = inputs[2].value;
+
+  const { error } = await supabaseClient
+    .from('players')
+    .insert([
+      {
+        full_name: full_name,
+        phone: phone,
+        program: program
+      }
+    ]);
+
+  if (error) {
+    alert('Pendaftaran gagal: ' + error.message);
+    return;
+  }
+
+  alert('Pendaftaran berhasil! Data sudah tersimpan.');
+  form.reset();
 }
 </script>
 </body>
