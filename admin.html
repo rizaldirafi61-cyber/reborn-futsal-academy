@@ -1162,6 +1162,12 @@ async function loadSchedules() {
     </button>
 
     <button
+  class="btn small"
+  onclick="openAttendance('${schedule.id}')">
+  📋 Absensi
+</button>
+
+    <button
       class="btn small"
       onclick="deleteSchedule('${schedule.id}')"
       style="background:#dc2626;color:white;">
