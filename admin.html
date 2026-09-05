@@ -286,7 +286,94 @@
       <p id="message" class="form-note"></p>
 
     </section>
+<section class="panel">
+  <h2>📅 Jadwal Latihan</h2>
 
+  <button
+    class="btn primary"
+    onclick="showAddScheduleForm()">
+    + Tambah Jadwal
+  </button>
+
+  <div
+    id="addScheduleForm"
+    style="display:none; margin-top:20px;">
+
+    <form onsubmit="addSchedule(event)">
+
+      <input
+        type="date"
+        id="scheduleDate"
+        required
+      >
+
+      <input
+        type="time"
+        id="scheduleStart"
+        required
+      >
+
+      <input
+        type="time"
+        id="scheduleEnd"
+        required
+      >
+
+      <select id="scheduleProgram" required>
+        <option value="">Pilih Program</option>
+        <option value="Junior">Junior</option>
+        <option value="Youth">Youth</option>
+        <option value="Senior">Senior</option>
+      </select>
+
+      <input
+        type="text"
+        id="scheduleLocation"
+        placeholder="Lokasi latihan"
+      >
+
+      <textarea
+        id="scheduleNotes"
+        placeholder="Keterangan">
+      </textarea>
+
+      <button type="submit" class="btn primary">
+        Simpan Jadwal
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        onclick="hideAddScheduleForm()">
+        Batal
+      </button>
+
+      <p
+        id="scheduleMessage"
+        class="form-note">
+      </p>
+
+    </form>
+  </div>
+
+  <div style="overflow-x:auto; margin-top:20px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Jam</th>
+          <th>Program</th>
+          <th>Lokasi</th>
+          <th>Keterangan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+
+      <tbody id="scheduleTable">
+      </tbody>
+    </table>
+  </div>
+</section>
   </main>
 
 <script>
@@ -693,9 +780,119 @@ function escapeHtml(value) {
   div.textContent = value;
 
   return div.innerHTML;
+}function showAddScheduleForm() {
+  document.getElementById('addScheduleForm').style.display = 'block';
+  document.getElementById('scheduleDate').focus();
 }
 
+function hideAddScheduleForm() {
+  document.getElementById('addScheduleForm').style.display = 'none';
+  document.getElementById('scheduleMessage').textContent = '';
+}
 
+async function addSchedule(event) {
+  event.preventDefault();
+
+  const message = document.getElementById('scheduleMessage');
+  message.textContent = 'Menyimpan jadwal...';
+
+  const schedule = {
+    training_date: document.getElementById('scheduleDate').value,
+    start_time: document.getElementById('scheduleStart').value,
+    end_time: document.getElementById('scheduleEnd').value,
+    program: document.getElementById('scheduleProgram').value,
+    location: document.getElementById('scheduleLocation').value.trim() || null,
+    notes: document.getElementById('scheduleNotes').value.trim() || null
+  };
+
+  const { error } = await supabaseClient
+    .from('training_schedules')
+    .insert([schedule]);
+
+  if (error) {
+    message.textContent = 'Gagal menyimpan: ' + error.message;
+    return;
+  }
+
+  alert('Jadwal latihan berhasil ditambahkan.');
+
+  document.querySelector('#addScheduleForm form').reset();
+  hideAddScheduleForm();
+
+  await loadSchedules();
+}
+
+async function loadSchedules() {
+  const table = document.getElementById('scheduleTable');
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="6">Memuat jadwal...</td>
+    </tr>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from('training_schedules')
+    .select('*')
+    .order('training_date', { ascending: true })
+    .order('start_time', { ascending: true });
+
+  if (error) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">
+          Gagal memuat jadwal: ${escapeHtml(error.message)}
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">Belum ada jadwal latihan.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  table.innerHTML = '';
+
+  data.forEach(schedule => {
+    const row = document.createElement('tr');
+
+    const date = schedule.training_date
+      ? new Date(schedule.training_date + 'T00:00:00')
+          .toLocaleDateString('id-ID')
+      : '-';
+
+    const start = schedule.start_time
+      ? schedule.start_time.substring(0, 5)
+      : '-';
+
+    const end = schedule.end_time
+      ? schedule.end_time.substring(0, 5)
+      : '-';
+
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>${start} - ${end}</td>
+      <td>${escapeHtml(schedule.program || '-')}</td>
+      <td>${escapeHtml(schedule.location || '-')}</td>
+      <td>${escapeHtml(schedule.notes || '-')}</td>
+      <td>
+        <button
+          class="btn small"
+          onclick="deleteSchedule('${schedule.id}')">
+          Hapus
+        </button>
+      </td>
+    `;
+
+    table.appendChild(row);
+  });
+}
 /* =========================
    LOGOUT
 ========================= */
@@ -711,13 +908,13 @@ async function logout() {
 /* =========================
    JALANKAN
 ========================= */
-
 (async function () {
 
   const authenticated = await checkAuth();
 
   if (authenticated) {
     await loadPlayers();
+    await loadSchedules();
   }
 
 })();
