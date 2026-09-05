@@ -672,6 +672,39 @@ async function loadSchedules() {
     return;
   }
 
+  table.innerHTML = data.map(schedule => `
+    <tr>
+      <td>${schedule.training_date || '-'}</td>
+      <td>
+        ${schedule.start_time || '-'}
+        ${schedule.end_time ? ' - ' + schedule.end_time : ''}
+      </td>
+      <td>${schedule.program || '-'}</td>
+      <td>${schedule.location || '-'}</td>
+      <td>${schedule.notes || '-'}</td>
+      <td>
+        <button
+          class="btn btn-secondary"
+          onclick="viewAttendance(${schedule.id})">
+          👁️ Lihat Absensi
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+  if (!data || data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Belum ada jadwal latihan.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
   const scheduleRows = await Promise.all(
     data.map(async schedule => {
 
