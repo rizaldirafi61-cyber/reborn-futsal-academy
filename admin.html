@@ -274,6 +274,7 @@
   <th>WhatsApp</th>
   <th>Program</th>
   <th>Tanggal Daftar</th>
+  <th>Dokumen</th>
   <th>Aksi</th>
 </tr>
           </thead>
@@ -746,31 +747,7 @@ function exportPlayersToExcel() {
 }
 async function loadPlayers() {
 
-  const loading = document.getElementById('loading');function filterPlayers() {
-
-  const searchInput = document.getElementById('searchPlayer');
-  const searchText = searchInput.value.toLowerCase().trim();
-
-  const table = document.getElementById('playersTable');
-  const rows = table.querySelectorAll('tr');
-
-  rows.forEach(row => {
-
-    const nameCell = row.querySelector('td');
-
-    if (!nameCell) {
-      return;
-    }
-
-    const playerName = nameCell.textContent.toLowerCase();
-
-    if (playerName.includes(searchText)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-}
+  const loading = document.getElementById('loading');
   const table = document.getElementById('playersTable');
   const message = document.getElementById('message');
 
@@ -784,12 +761,21 @@ async function loadPlayers() {
     .order('created_at', { ascending: false });
 
   if (error) {
-
     loading.textContent = '';
-
     message.textContent =
       'Gagal mengambil data: ' + error.message;
+    return;
+  }
 
+  // Ambil data dokumen
+  const { data: documents, error: documentError } = await supabaseClient
+    .from('player_documents')
+    .select('player_id, document_type, storage_path');
+
+  if (documentError) {
+    loading.textContent = '';
+    message.textContent =
+      'Gagal mengambil data dokumen: ' + documentError.message;
     return;
   }
 
@@ -802,9 +788,8 @@ async function loadPlayers() {
     data.length;
 
   if (data.length === 0) {
-
-   table.innerHTML =
-  '<tr><td colspan="5">Belum ada data pendaftar.</td></tr>';
+    table.innerHTML =
+      '<tr><td colspan="6">Belum ada data pendaftar.</td></tr>';
     return;
   }
 
@@ -816,35 +801,132 @@ async function loadPlayers() {
       ? new Date(player.created_at).toLocaleDateString('id-ID')
       : '-';
 
-row.innerHTML = `
-  <td>${escapeHtml(player.full_name || '-')}</td>
-  <td>${escapeHtml(player.phone || '-')}</td>
-  <td>${escapeHtml(player.program || '-')}</td>
-  <td>${date}</td>
-  <td>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button
-        class="btn primary small"
-        onclick="editPlayer('${player.id}')">
-        Edit
-      </button>
-<button
-  class="btn small"
-  onclick="openWhatsApp('${escapeHtml(player.phone || '')}')">
-  WhatsApp
-</button>
-      <button
-        class="btn small"
-        onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')">
-        Hapus
-      </button>
-    </div>
-  </td>
-`;
+    const playerDocuments = (documents || []).filter(
+      doc => doc.player_id === player.id
+    );
+
+    const kkDocument = playerDocuments.find(
+      doc => doc.document_type === 'kk'
+    );
+
+    const aktaDocument = playerDocuments.find(
+      doc => doc.document_type === 'akta_kelahiran'
+    );
+
+    let documentHtml = '';
+
+    if (kkDocument) {
+      documentHtml += `
+        <button
+          class="btn small"
+          onclick="openPrivateDocument('${kkDocument.storage_path}', 'KK')">
+          📄 KK
+        </button>
+      `;
+    } else {
+      documentHtml += `
+        <span class="muted">KK belum ada</span>
+      `;
+    }
+
+    if (aktaDocument) {
+      documentHtml += `
+        <button
+          class="btn small"
+          onclick="openPrivateDocument('${aktaDocument.storage_path}', 'Akta Kelahiran')">
+          📄 Akta
+        </button>
+      `;
+    } else {
+      documentHtml += `
+        <span class="muted">Akta belum ada</span>
+      `;
+    }
+
+    row.innerHTML = `
+      <td>${escapeHtml(player.full_name || '-')}</td>
+
+      <td>${escapeHtml(player.phone || '-')}</td>
+
+      <td>${escapeHtml(player.program || '-')}</td>
+
+      <td>${date}</td>
+
+      <td>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          ${documentHtml}
+        </div>
+      </td>
+
+      <td>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+          <button
+            class="btn primary small"
+            onclick="editPlayer('${player.id}')">
+            Edit
+          </button>
+
+          <button
+            class="btn small"
+            onclick="openWhatsApp('${escapeHtml(player.phone || '')}')">
+            WhatsApp
+          </button>
+
+          <button
+            class="btn small"
+            onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')">
+            Hapus
+          </button>
+
+        </div>
+      </td>
+    `;
+
     table.appendChild(row);
   });
 }
+  async function openPrivateDocument(storagePath, documentName) {
 
+  if (!storagePath) {
+    alert('Dokumen ' + documentName + ' tidak tersedia.');
+    return;
+  }
+
+  try {
+
+    const { data, error } = await supabaseClient.storage
+      .from('player-documents')
+      .createSignedUrl(storagePath, 300);
+
+    if (error) {
+      alert(
+        'Gagal membuka dokumen ' +
+        documentName +
+        ': ' +
+        error.message
+      );
+      return;
+    }
+
+    if (!data || !data.signedUrl) {
+      alert('Link dokumen tidak berhasil dibuat.');
+      return;
+    }
+
+    window.open(data.signedUrl, '_blank');
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      'Terjadi kesalahan saat membuka dokumen ' +
+      documentName +
+      '.'
+    );
+  }
+}
 
 /* =========================
    CEGAH HTML INJECTION
