@@ -932,25 +932,26 @@ document.getElementById('totalU17').textContent =
         </div>
       </td>
 
-     <td>
+   <td>
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
 
     <button
-  class="btn primary small"
-  onclick="editPlayer('${player.id}')">
-  Edit
-</button>
+      class="btn primary small"
+      onclick="editPlayer('${player.id}')">
+      Edit
+    </button>
 
-<button
-  class="btn small"
-  onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')"
-  style="background:#dc2626;color:white;">
-  Hapus
-</button>
+    <button
+      class="btn small"
+      onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')"
+      style="background:#dc2626;color:white;">
+      Hapus
+    </button>
 
   </div>
 </td>
-
+`;
+    
     table.appendChild(row);
   });
 }
@@ -1128,22 +1129,24 @@ async function loadSchedules() {
       <td>${escapeHtml(schedule.location || '-')}</td>
       <td>${escapeHtml(schedule.notes || '-')}</td>
      <td>
+ <td>
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
 
     <button
       class="btn primary small"
-      onclick="editSchedule('${schedule.id}')">
+      onclick="editPost(${post.id})">
       Edit
     </button>
 
     <button
       class="btn small"
-      onclick="deleteSchedule('${schedule.id}')"
+      onclick="deletePost(${post.id})"
       style="background:#dc2626;color:white;">
       Hapus
     </button>
 
   </div>
+</td>
 </td>
     `;
 
