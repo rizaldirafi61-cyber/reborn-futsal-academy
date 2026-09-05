@@ -1134,13 +1134,13 @@ async function loadSchedules() {
 
     <button
       class="btn primary small"
-      onclick="editPlayer('${player.id}')">
+      onclick="editSchedule('${schedule.id}')">
       Edit
     </button>
 
     <button
       class="btn small"
-      onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')"
+      onclick="deleteSchedule('${schedule.id}')"
       style="background:#dc2626;color:white;">
       Hapus
     </button>
