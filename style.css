@@ -511,3 +511,127 @@ nav .nav-cta{
 #playersTable td:nth-child(7) {
   width: 16%;
 }
+/* =========================================
+   SIDEBAR DASHBOARD MANAGEMENT
+   DESKTOP + HP
+========================================= */
+
+.admin-sidebar {
+  width: 245px;
+  min-width: 245px;
+  box-sizing: border-box;
+  border-right: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.admin-sidebar nav {
+  display: grid;
+  gap: 6px;
+  margin-top: 35px;
+}
+
+.admin-sidebar nav a {
+  display: block;
+  padding: 12px;
+  border-radius: 10px;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a.active {
+  background: #ecfdf5;
+  color: #15803d;
+}
+
+.admin-sidebar > .btn {
+  margin-top: auto;
+}
+
+.admin-main {
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   TAMPILAN HP
+========================================= */
+
+@media (max-width: 650px) {
+
+  .admin-page {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .admin-sidebar {
+    position: relative;
+    top: auto;
+    left: auto;
+    bottom: auto;
+
+    width: 100%;
+    min-width: 0;
+
+    padding: 18px 16px;
+
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .admin-sidebar nav {
+    display: grid;
+    width: 100%;
+    margin-top: 20px;
+    gap: 8px;
+  }
+
+  .admin-sidebar nav a {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-sidebar > .btn {
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .admin-main {
+    width: 100%;
+    margin-left: 0;
+    padding: 20px 14px;
+  }
+
+  .admin-header h1 {
+    font-size: 30px;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
