@@ -1133,13 +1133,24 @@ async function loadSchedules() {
       <td>${escapeHtml(schedule.program || '-')}</td>
       <td>${escapeHtml(schedule.location || '-')}</td>
       <td>${escapeHtml(schedule.notes || '-')}</td>
-      <td>
-        <button
-          class="btn small"
-          onclick="deleteSchedule('${schedule.id}')">
-          Hapus
-        </button>
-      </td>
+     <td>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+    <button
+      class="btn primary small"
+      onclick="editSchedule('${schedule.id}')">
+      Edit
+    </button>
+
+    <button
+      class="btn small"
+      onclick="deleteSchedule('${schedule.id}')"
+      style="background:#dc2626;color:white;">
+      Hapus
+    </button>
+
+  </div>
+</td>
     `;
 
     table.appendChild(row);
