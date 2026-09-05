@@ -758,7 +758,7 @@ async function loadPlayers() {
 
   const { data, error } = await supabaseClient
     .from('players')
-    .select('id, full_name, phone, program, position, jersey_number, birth_date, notes, created_at')
+   .select('id, full_name, phone, program, registration_status, position, jersey_number, birth_date, notes, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
