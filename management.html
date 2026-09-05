@@ -838,9 +838,10 @@ async function viewAttendance(scheduleId) {
     await checkManagement();
 
 
-  if (allowed) {
-    await loadPlayers();
-  }
+if (allowed) {
+  await loadPlayers();
+  await loadSchedules();
+}
 
 })();
 
