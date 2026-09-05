@@ -495,7 +495,31 @@ async function deletePlayer(playerId, playerName) {
 
 async function loadPlayers() {
 
-  const loading = document.getElementById('loading');
+  const loading = document.getElementById('loading');function filterPlayers() {
+
+  const searchInput = document.getElementById('searchPlayer');
+  const searchText = searchInput.value.toLowerCase().trim();
+
+  const table = document.getElementById('playersTable');
+  const rows = table.querySelectorAll('tr');
+
+  rows.forEach(row => {
+
+    const nameCell = row.querySelector('td');
+
+    if (!nameCell) {
+      return;
+    }
+
+    const playerName = nameCell.textContent.toLowerCase();
+
+    if (playerName.includes(searchText)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
   const table = document.getElementById('playersTable');
   const message = document.getElementById('message');
 
