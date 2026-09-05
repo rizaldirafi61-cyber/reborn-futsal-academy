@@ -119,39 +119,9 @@ if (data.session) {
     return;
   }
 
-  // Cek Management
-  // Cek Management melalui fungsi database
-const {
-  data: management,
-  error: managementError
-} = await supabaseClient
-  .rpc('is_management_user');
-
-console.log('Management:', management);
-console.log('Management Error:', managementError);
-
-if (managementError) {
-  loginMessage.textContent =
-    'Error cek Management: ' + managementError.message;
-  console.error('Management Error:', managementError);
-  return;
-}
-
-if (management === true) {
-  window.location.href = 'management.html';
-  return;
-}
-
-  if (management) {
-    window.location.href = 'management.html';
-    return;
-  }
-
-  await supabaseClient.auth.signOut();
-
-  loginMessage.textContent =
-    'Akun berhasil login, tetapi tidak ditemukan sebagai Admin atau Management.';
-}
+ // Jika bukan Admin, masuk ke Management
+window.location.href = 'management.html';
+return;
 });
 </script>
 
