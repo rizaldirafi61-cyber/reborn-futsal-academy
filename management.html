@@ -735,6 +735,19 @@ async function viewAttendance(scheduleId) {
     attendanceMap[item.player_id] = item;
   });
 
+  const hadirCount = (attendance || []).filter(
+  item => item.attendance_status === 'Hadir'
+).length;
+
+const tidakHadirCount = (attendance || []).filter(
+  item => item.attendance_status === 'Tidak Hadir'
+).length;
+
+const belumDiisiCount = (players || []).filter(
+  player => !attendanceMap[player.id] ||
+            attendanceMap[player.id].attendance_status === 'Belum Diisi'
+).length;
+
   const rows = (players || []).map(player => {
     const record = attendanceMap[player.id];
 
