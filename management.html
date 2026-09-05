@@ -346,49 +346,8 @@ async function checkManagement() {
     return false;
   }
 
-
- const {
-  data: management,
-  error
-} = await supabaseClient
-  .rpc('is_management_user');
-
-  if (error) {
-
-    console.error(
-      'Gagal memeriksa Management:',
-      error
-    );
-
-    alert(
-      'Terjadi kesalahan saat memeriksa akses.'
-    );
-
-    await supabaseClient.auth.signOut();
-
-    window.location.href = 'login.html';
-
-    return false;
-  }
-
-
-if (management !== true) {
-
-    alert(
-      'Akun ini bukan akun Management.'
-    );
-
-    await supabaseClient.auth.signOut();
-
-    window.location.href = 'login.html';
-
-    return false;
-  }
-
-
   return true;
 }
-
 
 async function loadPlayers() {
 
