@@ -1540,7 +1540,327 @@ async function deletePost(postId) {
 
   await loadPosts();
 }
+async function openAttendance(scheduleId) {
+  try {
+    const { data: schedule, error: scheduleError } =
+      await supabaseClient
+        .from('training_schedules')
+        .select('*')
+        .eq('id', scheduleId)
+        .single();
 
+    if (scheduleError) throw scheduleError;
+
+    const { data: players, error: playersError } =
+      await supabaseClient
+        .from('players')
+        .select('id, full_name, program, status')
+        .eq('program', schedule.program)
+        .order('full_name');
+
+    if (playersError) throw playersError;
+
+    const { data: attendance, error: attendanceError } =
+      await supabaseClient
+        .from('training_attendance')
+        .select('*')
+        .eq('schedule_id', scheduleId);
+
+    if (attendanceError) throw attendanceError;
+
+    const attendanceMap = {};
+
+    (attendance || []).forEach(item => {
+      attendanceMap[item.player_id] =
+        item.attendance_status;
+    });
+
+    let rows = '';
+
+    if (!players || players.length === 0) {
+      rows = `
+        <tr>
+          <td colspan="4" style="text-align:center;padding:25px;">
+            Belum ada pemain pada program ${schedule.program}.
+          </td>
+        </tr>
+      `;
+    } else {
+      players.forEach((player, index) => {
+
+        const status =
+          attendanceMap[player.id] || 'Belum Diisi';
+
+        rows += `
+          <tr>
+            <td>${index + 1}</td>
+
+            <td>
+              <strong>
+                ${escapeAttendanceHtml(
+                  player.full_name || '-'
+                )}
+              </strong>
+            </td>
+
+            <td>
+              ${escapeAttendanceHtml(
+                player.program || '-'
+              )}
+            </td>
+
+            <td>
+              <select
+                class="attendance-select"
+                id="attendance-${player.id}"
+                onchange="
+                  saveAttendance(
+                    '${scheduleId}',
+                    '${player.id}',
+                    this.value
+                  )
+                "
+              >
+                <option value="Belum Diisi"
+                  ${status === 'Belum Diisi' ? 'selected' : ''}>
+                  Belum Diisi
+                </option>
+
+                <option value="Hadir"
+                  ${status === 'Hadir' ? 'selected' : ''}>
+                  Hadir
+                </option>
+
+                <option value="Tidak Hadir"
+                  ${status === 'Tidak Hadir' ? 'selected' : ''}>
+                  Tidak Hadir
+                </option>
+              </select>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    const html = `
+      <div id="attendanceOverlay"
+           class="attendance-overlay">
+
+        <div class="attendance-modal">
+
+          <div class="attendance-header">
+
+            <div>
+              <h2>📋 Absensi Latihan</h2>
+
+              <p>
+                Program:
+                <strong>${schedule.program}</strong>
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="attendance-close"
+              onclick="closeAttendance()">
+              ✕
+            </button>
+
+          </div>
+
+          <div class="attendance-info">
+            📅 ${formatAttendanceDate(schedule.training_date)}
+            &nbsp; • &nbsp;
+            ⏰ ${schedule.start_time || '-'}
+            -
+            ${schedule.end_time || '-'}
+            &nbsp; • &nbsp;
+            📍 ${schedule.location || '-'}
+          </div>
+
+          <div class="attendance-actions">
+
+            <button
+              type="button"
+              class="attendance-all-btn"
+              onclick="setAllAttendance('${scheduleId}', 'Hadir')">
+              ✅ Hadir Semua
+            </button>
+
+            <button
+              type="button"
+              class="attendance-all-btn"
+              onclick="setAllAttendance('${scheduleId}', 'Tidak Hadir')">
+              ❌ Tidak Hadir Semua
+            </button>
+
+          </div>
+
+          <div class="attendance-table-wrap">
+
+            <table class="attendance-table">
+
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Pemain</th>
+                  <th>Program</th>
+                  <th>Kehadiran</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${rows}
+              </tbody>
+
+            </table>
+
+          </div>
+
+          <div class="attendance-footer">
+
+            <button
+              type="button"
+              onclick="closeAttendance()">
+              Tutup
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      html
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Attendance error:',
+      error
+    );
+
+    alert(
+      'Gagal membuka absensi: ' +
+      error.message
+    );
+  }
+}
+
+
+async function saveAttendance(
+  scheduleId,
+  playerId,
+  status
+) {
+  try {
+
+    const { error } =
+      await supabaseClient
+        .from('training_attendance')
+        .upsert(
+          {
+            schedule_id: scheduleId,
+            player_id: playerId,
+            attendance_status: status,
+            updated_at:
+              new Date().toISOString()
+          },
+          {
+            onConflict:
+              'schedule_id,player_id'
+          }
+        );
+
+    if (error) throw error;
+
+  } catch (error) {
+
+    console.error(
+      'Save attendance error:',
+      error
+    );
+
+    alert(
+      'Gagal menyimpan absensi: ' +
+      error.message
+    );
+  }
+}
+
+
+async function setAllAttendance(
+  scheduleId,
+  status
+) {
+  const selects =
+    document.querySelectorAll(
+      '.attendance-select'
+    );
+
+  for (const select of selects) {
+
+    select.value = status;
+
+    const playerId =
+      select.id.replace(
+        'attendance-',
+        ''
+      );
+
+    await saveAttendance(
+      scheduleId,
+      playerId,
+      status
+    );
+  }
+}
+
+
+function closeAttendance() {
+  const overlay =
+    document.getElementById(
+      'attendanceOverlay'
+    );
+
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+
+function formatAttendanceDate(dateString) {
+
+  if (!dateString) return '-';
+
+  const date =
+    new Date(
+      dateString + 'T00:00:00'
+    );
+
+  return date.toLocaleDateString(
+    'id-ID',
+    {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }
+  );
+}
+
+
+function escapeAttendanceHtml(value) {
+
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 </script>
 
 </body>
