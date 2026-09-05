@@ -256,17 +256,17 @@
       <div style="margin:20px 0;">
   <input
     type="text"
+   <div class="player-filters">
+  <input
     id="searchPlayer"
+    type="text"
     placeholder="🔎 Cari nama pemain..."
     oninput="filterPlayers()"
-    style="width:100%; max-width:400px;"
-  >
-</div>
-   <div style="margin:10px 0 20px;">
+  />
+
   <select
     id="filterStatus"
     onchange="filterPlayers()"
-    style="width:100%; max-width:400px; padding:10px;"
   >
     <option value="">Semua Status</option>
     <option value="Menunggu">Menunggu</option>
