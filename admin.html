@@ -1344,3 +1344,74 @@ async function deletePost(postId) {
 
 </body>
 </html>
+
+async function editPost(postId) {
+
+  const { data: post, error } = await supabaseClient
+    .from('academy_posts')
+    .select('*')
+    .eq('id', postId)
+    .single();
+
+  if (error) {
+    alert('Gagal mengambil data berita: ' + error.message);
+    return;
+  }
+
+  const title = prompt(
+    'Judul berita / prestasi:',
+    post.title || ''
+  );
+
+  if (title === null) return;
+
+  const type = prompt(
+    'Jenis (berita atau prestasi):',
+    post.post_type || 'berita'
+  );
+
+  if (type === null) return;
+
+  const content = prompt(
+    'Isi berita / prestasi:',
+    post.content || ''
+  );
+
+  if (content === null) return;
+
+  const imageUrl = prompt(
+    'URL foto (opsional):',
+    post.image_url || ''
+  );
+
+  if (imageUrl === null) return;
+
+  const cleanType = type.toLowerCase().trim();
+
+  if (!['berita', 'prestasi'].includes(cleanType)) {
+    alert('Jenis harus diisi "berita" atau "prestasi".');
+    return;
+  }
+
+  const { error: updateError } = await supabaseClient
+    .from('academy_posts')
+    .update({
+      title: title.trim(),
+      post_type: cleanType,
+      content: content.trim() || null,
+      image_url: imageUrl.trim() || null
+    })
+    .eq('id', postId);
+
+  if (updateError) {
+    alert(
+      'Gagal memperbarui berita / prestasi: ' +
+      updateError.message
+    );
+    return;
+  }
+
+  alert('Berita / prestasi berhasil diperbarui.');
+
+  await loadPosts();
+}
