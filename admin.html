@@ -685,16 +685,39 @@ function filterPlayers() {
     .toLowerCase()
     .trim();
 
+  const selectedStatus = document
+    .getElementById('filterStatus')
+    .value;
+
   const rows = document.querySelectorAll('#playersTable tr');
 
   rows.forEach(row => {
 
-    const nameCell = row.querySelector('td');
+    const cells = row.querySelectorAll('td');
 
-    if (!nameCell) {
+    if (cells.length < 7) {
       return;
     }
 
+    const playerName = cells[0].textContent
+      .toLowerCase()
+      .trim();
+
+    const playerStatus = cells[4].querySelector('select')
+      ? cells[4].querySelector('select').value
+      : '';
+
+    const matchName =
+      playerName.includes(searchText);
+
+    const matchStatus =
+      selectedStatus === '' ||
+      playerStatus === selectedStatus;
+
+    row.style.display =
+      matchName && matchStatus ? '' : 'none';
+  });
+}
     const playerName = nameCell.textContent
       .toLowerCase()
       .trim();
