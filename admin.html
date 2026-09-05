@@ -454,7 +454,33 @@ async function editPlayer(playerId) {
 
   document.getElementById('editPlayerMessage').textContent = '';
 }
-/* =========================
+async function deletePlayer(playerId, playerName) {
+
+  const confirmed = confirm(
+    'Apakah Anda yakin ingin menghapus pemain "' +
+    playerName +
+    '"?'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('players')
+    .delete()
+    .eq('id', playerId);
+
+  if (error) {
+    alert('Gagal menghapus pemain: ' + error.message);
+    return;
+  }
+
+  alert('Pemain berhasil dihapus.');
+
+  await loadPlayers();
+}
+  /* =========================
    LOAD DATA PEMAIN
 ========================= */
 
