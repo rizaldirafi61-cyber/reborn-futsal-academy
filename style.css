@@ -75,5 +75,125 @@ footer{border-top:1px solid var(--line);padding:35px 5% 25px;background:#fff}.fo
 nav{gap:12px}.hero{grid-template-columns:1fr;padding-top:55px}.hero-visual{height:450px}.program-grid,.admin-stats{grid-template-columns:repeat(2,1fr)}.players{grid-template-columns:repeat(2,1fr)}.value-grid{grid-template-columns:1fr}.split-section{grid-template-columns:1fr}.register-box{grid-template-columns:1fr}.admin-grid{grid-template-columns:1fr}.sidebar{width:190px}.admin-main{margin-left:190px;width:calc(100% - 190px)}
 }
 @media(max-width:650px){
-.topbar{padding:0 6%}nav{display:none}.hero{padding:50px 6%}.hero-visual{height:390px}.player-illustration{transform:scale(.8)}.quote-card{right:12px;bottom:12px}.section{padding:65px 6%}.program-grid,.players,.admin-stats{grid-template-columns:1fr}.hero-actions{flex-direction:column}.stats{justify-content:space-between;gap:10px}.schedule-item{grid-template-columns:58px 1fr}.schedule-item .pill{grid-column:2;justify-self:start}.footer-main,.footer-bottom{display:block}.footer-contact{margin-top:20px}.footer-bottom span{display:block;margin-top:7px}.sidebar{position:static;width:100%;min-height:auto}.admin-page{display:block}.side-nav{grid-template-columns:repeat(2,1fr)}.admin-main{margin:0;width:100%;padding:30px 6%}.admin-header{display:block}.admin-header .btn{margin-top:15px}.auth-card{padding:28px}.back{position:static;display:block;margin-bottom:15px}
+  .topbar{
+    height:auto;
+    min-height:70px;
+    padding:12px 5%;
+  }
+
+  nav{
+    display:none;
+  }
+
+  .brand{
+    gap:8px;
+  }
+
+  .brand-mark{
+    width:38px;
+    height:38px;
+    font-size:12px;
+  }
+
+  .brand strong{
+    font-size:16px;
+  }
+
+  .brand small{
+    font-size:9px;
+  }
+
+  .hero{
+    padding:45px 5% 35px;
+  }
+
+  h1{
+    font-size:40px;
+    line-height:1.02;
+  }
+
+  h2{
+    font-size:30px;
+  }
+
+  .hero-copy p{
+    font-size:15px;
+    line-height:1.6;
+  }
+
+  .hero-actions{
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .hero-actions .btn{
+    width:100%;
+    text-align:center;
+  }
+
+  .hero-visual{
+    height:300px;
+    margin-top:25px;
+  }
+
+  .player-illustration{
+    transform:scale(.65);
+  }
+
+  .section{
+    padding:55px 5%;
+  }
+
+  .section-row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .program-grid,
+  .players-grid,
+  .value-grid{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .schedule-list{
+    gap:12px;
+  }
+
+  .schedule-item{
+    grid-template-columns:1fr;
+    gap:12px;
+    padding:18px;
+  }
+
+  .date{
+    width:52px;
+    height:52px;
+  }
+
+  .register-box{
+    grid-template-columns:1fr;
+    gap:30px;
+  }
+
+  .register-box form{
+    width:100%;
+  }
+
+  .register-box input,
+  .register-box select,
+  .register-box textarea{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+  .footer-main{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:20px;
+  }
+
+  .footer-content{
+    width:100%;
+  }
 }
