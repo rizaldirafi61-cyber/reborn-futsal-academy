@@ -374,6 +374,83 @@
     </table>
   </div>
 </section>
+    <section class="panel">
+  <h2>📰 Berita & Prestasi</h2>
+
+  <button class="btn primary" onclick="showAddPostForm()">
+    + Tambah Berita / Prestasi
+  </button>
+
+  <div id="addPostForm" style="display:none; margin-top:20px;">
+    <div class="form-grid">
+
+      <div>
+        <label>Judul</label>
+        <input
+          type="text"
+          id="postTitle"
+          placeholder="Contoh: Juara 1 Turnamen Futsal"
+        >
+      </div>
+
+      <div>
+        <label>Jenis</label>
+        <select id="postType">
+          <option value="berita">Berita</option>
+          <option value="prestasi">Prestasi</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Isi Berita / Prestasi</label>
+        <textarea
+          id="postContent"
+          rows="5"
+          placeholder="Tulis berita atau prestasi academy..."
+        ></textarea>
+      </div>
+
+      <div>
+        <label>URL Foto (opsional)</label>
+        <input
+          type="text"
+          id="postImage"
+          placeholder="https://..."
+        >
+      </div>
+
+    </div>
+
+    <br>
+
+    <button class="btn primary" onclick="addPost()">
+      Simpan
+    </button>
+
+    <button class="btn" onclick="hideAddPostForm()">
+      Batal
+    </button>
+  </div>
+
+  <div style="overflow-x:auto; margin-top:25px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Jenis</th>
+          <th>Judul</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+
+      <tbody id="postsTable">
+        <tr>
+          <td colspan="4">Memuat data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
   </main>
 
 <script>
@@ -936,12 +1013,150 @@ async function logout() {
 
   const authenticated = await checkAuth();
 
-  if (authenticated) {
-    await loadPlayers();
-    await loadSchedules();
+if (authenticated) {
+  await loadPlayers();
+  await loadSchedules();
+  await loadPosts();
+}
   }
 
 })();
+<script>
+function showAddPostForm() {
+  document.getElementById('addPostForm').style.display = 'block';
+}
+
+function hideAddPostForm() {
+  document.getElementById('addPostForm').style.display = 'none';
+
+  document.getElementById('postTitle').value = '';
+  document.getElementById('postType').value = 'berita';
+  document.getElementById('postContent').value = '';
+  document.getElementById('postImage').value = '';
+}
+
+async function addPost() {
+  const title = document.getElementById('postTitle').value.trim();
+  const postType = document.getElementById('postType').value;
+  const content = document.getElementById('postContent').value.trim();
+  const imageUrl = document.getElementById('postImage').value.trim();
+
+  if (!title) {
+    alert('Judul wajib diisi.');
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('academy_posts')
+    .insert({
+      title: title,
+      post_type: postType,
+      content: content || null,
+      image_url: imageUrl || null
+    });
+
+  if (error) {
+    alert('Gagal menyimpan: ' + error.message);
+    return;
+  }
+
+  alert('Berita / prestasi berhasil ditambahkan.');
+  hideAddPostForm();
+  await loadPosts();
+}
+
+async function loadPosts() {
+  const table = document.getElementById('postsTable');
+
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="4">Memuat data...</td>
+    </tr>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from('academy_posts')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4">Gagal memuat data.</td>
+      </tr>
+    `;
+    console.error(error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4">Belum ada berita atau prestasi.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  table.innerHTML = '';
+
+  data.forEach(post => {
+    const tanggal = post.created_at
+      ? new Date(post.created_at).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })
+      : '-';
+
+    const jenis = post.post_type === 'prestasi'
+      ? 'Prestasi'
+      : 'Berita';
+
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${jenis}</td>
+      <td>${post.title || '-'}</td>
+      <td>${tanggal}</td>
+      <td>
+        <button
+          class="btn"
+          onclick="deletePost(${post.id})"
+          style="background:#dc2626;color:white;"
+        >
+          Hapus
+        </button>
+      </td>
+    `;
+
+    table.appendChild(row);
+  });
+}
+
+async function deletePost(postId) {
+  const confirmed = confirm(
+    'Apakah Anda yakin ingin menghapus berita / prestasi ini?'
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabaseClient
+    .from('academy_posts')
+    .delete()
+    .eq('id', postId);
+
+  if (error) {
+    alert('Gagal menghapus: ' + error.message);
+    return;
+  }
+
+  alert('Berita / prestasi berhasil dihapus.');
+  await loadPosts();
+}
+</script>
 </script>
 
 </body>
