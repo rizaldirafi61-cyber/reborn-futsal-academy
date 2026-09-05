@@ -347,15 +347,11 @@ async function checkManagement() {
   }
 
 
-  const {
-    data: management,
-    error
-  } = await supabaseClient
-    .from('management_users')
-    .select('user_id')
-    .eq('user_id', session.user.id)
-    .maybeSingle();
-
+ const {
+  data: management,
+  error
+} = await supabaseClient
+  .rpc('is_management_user');
 
   if (error) {
 
@@ -376,7 +372,7 @@ async function checkManagement() {
   }
 
 
-  if (!management) {
+if (management !== true) {
 
     alert(
       'Akun ini bukan akun Management.'
