@@ -672,6 +672,83 @@ async function loadSchedules() {
     return;
   }
 
+  const scheduleRows = await Promise.all(
+    data.map(async schedule => {
+
+      const { data: attendance, error: attendanceError } =
+        await supabaseClient
+          .from('training_attendance')
+          .select('attendance_status')
+          .eq('schedule_id', schedule.id);
+
+      if (attendanceError) {
+        console.error(
+          'Gagal mengambil rekap absensi:',
+          attendanceError
+        );
+      }
+
+      const hadir = (attendance || []).filter(
+        item => item.attendance_status === 'Hadir'
+      ).length;
+
+      const tidakHadir = (attendance || []).filter(
+        item => item.attendance_status === 'Tidak Hadir'
+      ).length;
+
+      return `
+        <tr>
+          <td>${schedule.training_date || '-'}</td>
+
+          <td>
+            ${schedule.start_time || '-'}
+            ${schedule.end_time ? ' - ' + schedule.end_time : ''}
+          </td>
+
+          <td>${schedule.program || '-'}</td>
+
+          <td>${schedule.location || '-'}</td>
+
+          <td>${schedule.notes || '-'}</td>
+
+          <td>
+            <div style="
+              display:flex;
+              flex-direction:column;
+              gap:6px;
+              align-items:flex-start;
+            ">
+              <strong>
+                📊 Hadir ${hadir} | Tidak Hadir ${tidakHadir}
+              </strong>
+
+              <button
+                class="btn btn-secondary"
+                onclick="viewAttendance(${schedule.id})">
+                👁️ Lihat Absensi
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+  );
+
+  table.innerHTML = scheduleRows.join('');
+}
+
+  if (!data || data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Belum ada jadwal latihan.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
   table.innerHTML = data.map(schedule => `
     <tr>
       <td>${schedule.training_date || '-'}</td>
