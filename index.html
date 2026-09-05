@@ -291,5 +291,88 @@ async function loadPublicSchedules() {
 }
 
 loadPublicSchedules();
-</script></body>
+async function loadPublicPosts() {
+  const postsList = document.getElementById('publicPostsList');
+
+  if (!postsList) {
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('academy_posts')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Gagal memuat berita:', error);
+
+    postsList.innerHTML = `
+      <article class="card value-card">
+        <div class="icon">⚠️</div>
+        <h3>Berita belum dapat dimuat</h3>
+        <p>Silakan coba beberapa saat lagi.</p>
+      </article>
+    `;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    postsList.innerHTML = `
+      <article class="card value-card">
+        <div class="icon">📰</div>
+        <h3>Belum ada berita</h3>
+        <p>Berita dan prestasi terbaru akan ditampilkan di sini.</p>
+      </article>
+    `;
+
+    return;
+  }
+
+  postsList.innerHTML = '';
+
+  data.forEach(post => {
+    const tanggal = post.created_at
+      ? new Date(post.created_at).toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })
+      : '';
+
+    const jenis = post.post_type === 'prestasi'
+      ? 'PRESTASI'
+      : 'BERITA';
+
+    const article = document.createElement('article');
+    article.className = 'card value-card';
+
+    article.innerHTML = `
+      <div class="icon">
+        ${post.post_type === 'prestasi' ? '🏆' : '📰'}
+      </div>
+
+      ${
+        post.image_url
+          ? `<img src="${post.image_url}" alt="${post.title || 'Berita Reborn'}" style="width:100%;border-radius:12px;margin-bottom:15px;">`
+          : ''
+      }
+
+      <small style="font-weight:700;color:#0a8f3d;">
+        ${jenis}
+      </small>
+
+      <h3>${post.title || '-'}</h3>
+
+      <p>${post.content || ''}</p>
+
+      <small>${tanggal}</small>
+    `;
+
+    postsList.appendChild(article);
+  });
+}
+
+loadPublicPosts();</script>
+</body>
 </html>
