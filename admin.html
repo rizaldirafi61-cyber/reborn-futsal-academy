@@ -519,6 +519,20 @@ function filterPlayers() {
       playerName.includes(searchText) ? '' : 'none';
   });
 }
+  function openWhatsApp(phone) {
+  if (!phone) {
+    alert('Nomor WhatsApp pemain belum tersedia.');
+    return;
+  }
+
+  let cleanPhone = phone.replace(/\D/g, '');
+
+  if (cleanPhone.startsWith('0')) {
+    cleanPhone = '62' + cleanPhone.substring(1);
+  }
+
+  window.open('https://wa.me/' + cleanPhone, '_blank');
+}
   /* =========================
    LOAD DATA PEMAIN
 ========================= */
@@ -607,7 +621,11 @@ row.innerHTML = `
         onclick="editPlayer('${player.id}')">
         Edit
       </button>
-
+<button
+  class="btn small"
+  onclick="openWhatsApp('${escapeHtml(player.phone || '')}')">
+  WhatsApp
+</button>
       <button
         class="btn small"
         onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')">
