@@ -512,11 +512,19 @@ row.innerHTML = `
   <td>${escapeHtml(player.program || '-')}</td>
   <td>${date}</td>
   <td>
-    <button
-      class="btn primary small"
-      onclick="editPlayer('${player.id}')">
-      Edit
-    </button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button
+        class="btn primary small"
+        onclick="editPlayer('${player.id}')">
+        Edit
+      </button>
+
+      <button
+        class="btn small"
+        onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')">
+        Hapus
+      </button>
+    </div>
   </td>
 `;
     table.appendChild(row);
