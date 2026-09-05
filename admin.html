@@ -1340,12 +1340,7 @@ async function deletePost(postId) {
   alert('Berita / prestasi berhasil dihapus.');
   await loadPosts();
 }
-</script>
-
-</body>
-</html>
-
-async function editPost(postId) {
+  async function editPost(postId) {
 
   const { data: post, error } = await supabaseClient
     .from('academy_posts')
@@ -1415,3 +1410,9 @@ async function editPost(postId) {
 
   await loadPosts();
 }
+
+</script>
+
+</body>
+</html>
+
