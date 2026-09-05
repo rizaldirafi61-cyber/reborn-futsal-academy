@@ -718,14 +718,7 @@ function filterPlayers() {
       matchName && matchStatus ? '' : 'none';
   });
 }
-    const playerName = nameCell.textContent
-      .toLowerCase()
-      .trim();
 
-    row.style.display =
-      playerName.includes(searchText) ? '' : 'none';
-  });
-}
   function openWhatsApp(phone) {
   if (!phone) {
     alert('Nomor WhatsApp pemain belum tersedia.');
