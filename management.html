@@ -628,7 +628,70 @@ async function logout() {
   window.location.href = 'login.html';
 
 }
+async function loadSchedules() {
+  const table = document.getElementById('scheduleTable');
 
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="6" class="empty-message">
+        Memuat jadwal latihan...
+      </td>
+    </tr>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from('training_schedules')
+    .select('*')
+    .order('training_date', { ascending: false });
+
+  if (error) {
+    console.error('Gagal memuat jadwal:', error);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Gagal memuat jadwal latihan.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Belum ada jadwal latihan.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  table.innerHTML = data.map(schedule => `
+    <tr>
+      <td>${schedule.training_date || '-'}</td>
+      <td>
+        ${schedule.start_time || '-'}
+        ${schedule.end_time ? ' - ' + schedule.end_time : ''}
+      </td>
+      <td>${schedule.program || '-'}</td>
+      <td>${schedule.location || '-'}</td>
+      <td>${schedule.notes || '-'}</td>
+      <td>
+        <button
+          class="btn btn-secondary"
+          onclick="viewAttendance(${schedule.id})">
+          👁️ Lihat Absensi
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
 
 (async function() {
 
