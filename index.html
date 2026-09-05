@@ -230,31 +230,205 @@ async function registerDemo(e) {
   e.preventDefault();
 
   const form = e.target;
+  const button = form.querySelector('button[type="submit"]');
 
-  const full_name = document.getElementById('fullName').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const program = document.getElementById('program').value;
+  // Tampilkan status proses
+  let status = document.getElementById('registrationStatus');
 
-  const kkFile = document.getElementById('kkFile').files[0];
-  const aktaFile = document.getElementById('aktaFile').files[0];
-
-  if (!kkFile || !aktaFile) {
-    alert('KK dan Akta Kelahiran wajib diunggah.');
-    return;
+  if (!status) {
+    status = document.createElement('div');
+    status.id = 'registrationStatus';
+    status.style.marginTop = '15px';
+    status.style.padding = '12px 15px';
+    status.style.borderRadius = '10px';
+    status.style.fontWeight = '600';
+    form.appendChild(status);
   }
 
-  const allowedTypes = [
-    'application/pdf',
-    'image/jpeg',
-    'image/png'
-  ];
+  status.style.display = 'block';
+  status.style.background = '#fff7ed';
+  status.style.color = '#9a3412';
+  status.textContent = '⏳ Sedang mengirim data dan dokumen...';
 
-  const maxSize = 5 * 1024 * 1024;
+  button.disabled = true;
+  button.textContent = '⏳ Mengirim...';
 
-  if (!allowedTypes.includes(kkFile.type)) {
-    alert('File KK harus PDF, JPG, JPEG, atau PNG.');
-    return;
+  try {
+    const full_name = document.getElementById('fullName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const program = document.getElementById('program').value;
+
+    const kkFile = document.getElementById('kkFile').files[0];
+    const aktaFile = document.getElementById('aktaFile').files[0];
+
+    // Cek file
+    if (!kkFile) {
+      throw new Error('File KK belum dipilih.');
+    }
+
+    if (!aktaFile) {
+      throw new Error('File Akta Kelahiran belum dipilih.');
+    }
+
+    // Format file yang diperbolehkan
+    const allowedTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png'
+    ];
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (!allowedTypes.includes(kkFile.type)) {
+      throw new Error('File KK harus berupa PDF, JPG, JPEG, atau PNG.');
+    }
+
+    if (!allowedTypes.includes(aktaFile.type)) {
+      throw new Error('File Akta Kelahiran harus berupa PDF, JPG, JPEG, atau PNG.');
+    }
+
+    if (kkFile.size > maxSize) {
+      throw new Error('Ukuran file KK maksimal 5 MB.');
+    }
+
+    if (aktaFile.size > maxSize) {
+      throw new Error('Ukuran file Akta Kelahiran maksimal 5 MB.');
+    }
+
+    // ==========================================
+    // 1. SIMPAN DATA PEMAIN
+    // ==========================================
+
+    status.textContent = '⏳ Menyimpan data pendaftar...';
+
+    const { data: player, error: playerError } = await supabaseClient
+      .from('players')
+      .insert([
+        {
+          full_name: full_name,
+          phone: phone,
+          program: program
+        }
+      ])
+      .select('id')
+      .single();
+
+    if (playerError) {
+      throw new Error('Gagal menyimpan data pemain: ' + playerError.message);
+    }
+
+    const playerId = player.id;
+
+    // ==========================================
+    // 2. UPLOAD KK
+    // ==========================================
+
+    status.textContent = '⏳ Mengunggah dokumen KK...';
+
+    const kkPath =
+      `${playerId}/kk-${crypto.randomUUID()}.${getFileExtension(kkFile.name)}`;
+
+    const { error: kkUploadError } = await supabaseClient.storage
+      .from('player-documents')
+      .upload(kkPath, kkFile);
+
+    if (kkUploadError) {
+      throw new Error('Upload KK gagal: ' + kkUploadError.message);
+    }
+
+    // ==========================================
+    // 3. UPLOAD AKTA KELAHIRAN
+    // ==========================================
+
+    status.textContent = '⏳ Mengunggah Akta Kelahiran...';
+
+    const aktaPath =
+      `${playerId}/akta-kelahiran-${crypto.randomUUID()}.${getFileExtension(aktaFile.name)}`;
+
+    const { error: aktaUploadError } = await supabaseClient.storage
+      .from('player-documents')
+      .upload(aktaPath, aktaFile);
+
+    if (aktaUploadError) {
+      throw new Error(
+        'Upload Akta Kelahiran gagal: ' + aktaUploadError.message
+      );
+    }
+
+    // ==========================================
+    // 4. SIMPAN DATA DOKUMEN
+    // ==========================================
+
+    status.textContent = '⏳ Menyimpan informasi dokumen...';
+
+    const { error: documentError } = await supabaseClient
+      .from('player_documents')
+      .insert([
+        {
+          player_id: playerId,
+          document_type: 'kk',
+          storage_path: kkPath,
+          original_name: kkFile.name,
+          mime_type: kkFile.type,
+          file_size: kkFile.size
+        },
+        {
+          player_id: playerId,
+          document_type: 'akta_kelahiran',
+          storage_path: aktaPath,
+          original_name: aktaFile.name,
+          mime_type: aktaFile.type,
+          file_size: aktaFile.size
+        }
+      ]);
+
+    if (documentError) {
+      throw new Error(
+        'Data dokumen gagal disimpan: ' + documentError.message
+      );
+    }
+
+    // ==========================================
+    // 5. BERHASIL
+    // ==========================================
+
+    status.style.background = '#ecfdf5';
+    status.style.color = '#166534';
+    status.textContent =
+      '✅ Pendaftaran berhasil! Data dan dokumen sudah tersimpan.';
+
+    form.reset();
+
+    button.disabled = false;
+    button.textContent = 'Kirim Pendaftaran →';
+
+  } catch (error) {
+
+    // ==========================================
+    // ERROR
+    // ==========================================
+
+    console.error('Pendaftaran error:', error);
+
+    status.style.background = '#fef2f2';
+    status.style.color = '#b91c1c';
+    status.textContent =
+      '❌ Pendaftaran gagal: ' + error.message;
+
+    button.disabled = false;
+    button.textContent = 'Kirim Pendaftaran →';
   }
+}
+
+
+// Mengambil ekstensi file
+function getFileExtension(fileName) {
+  const parts = fileName.split('.');
+
+  return parts.length > 1
+    ? parts.pop().toLowerCase()
+    : 'file';
+}
 
   if (!allowedTypes.includes(aktaFile.type)) {
     alert('File Akta Kelahiran harus PDF, JPG, JPEG, atau PNG.');
