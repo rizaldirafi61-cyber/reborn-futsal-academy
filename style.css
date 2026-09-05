@@ -459,3 +459,43 @@ nav{gap:12px}.hero{grid-template-columns:1fr;padding-top:55px}.hero-visual{heigh
 #playersTable tr {
   height: auto;
 }
+/* LEBAR KOLOM TABEL */
+#playersTable {
+  table-layout: fixed;
+  min-width: 900px;
+}
+
+#playersTable th:nth-child(1),
+#playersTable td:nth-child(1) {
+  width: 16%;
+}
+
+#playersTable th:nth-child(2),
+#playersTable td:nth-child(2) {
+  width: 16%;
+}
+
+#playersTable th:nth-child(3),
+#playersTable td:nth-child(3) {
+  width: 12%;
+}
+
+#playersTable th:nth-child(4),
+#playersTable td:nth-child(4) {
+  width: 12%;
+}
+
+#playersTable th:nth-child(5),
+#playersTable td:nth-child(5) {
+  width: 14%;
+}
+
+#playersTable th:nth-child(6),
+#playersTable td:nth-child(6) {
+  width: 14%;
+}
+
+#playersTable th:nth-child(7),
+#playersTable td:nth-child(7) {
+  width: 16%;
+}
