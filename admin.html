@@ -259,12 +259,24 @@
   <input
     type="text"
    <div class="player-filters">
+
   <input
     id="searchPlayer"
     type="text"
     placeholder="🔎 Cari nama pemain..."
     oninput="filterPlayers()"
   />
+
+  <select
+    id="filterProgram"
+    onchange="filterPlayers()"
+  >
+    <option value="">Semua Kelompok Umur</option>
+    <option value="U14">U14</option>
+    <option value="U15">U15</option>
+    <option value="U16">U16</option>
+    <option value="U17">U17</option>
+  </select>
 
   <select
     id="filterStatus"
@@ -276,6 +288,7 @@
     <option value="Diterima">Diterima</option>
     <option value="Ditolak">Ditolak</option>
   </select>
+
 </div>
       
     <div id="loading" class="muted">
