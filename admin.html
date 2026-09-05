@@ -954,7 +954,26 @@ async function loadPlayers() {
    CEGAH HTML INJECTION
 ========================= */
 
-function escapeHtml(value) {
+async function updateRegistrationStatus(playerId, status) {
+
+  const { error } = await supabaseClient
+    .from('players')
+    .update({
+      registration_status: status
+    })
+    .eq('id', playerId);
+
+  if (error) {
+    alert('Gagal mengubah status: ' + error.message);
+
+    // Muat ulang agar status kembali ke data terakhir yang tersimpan
+    await loadPlayers();
+
+    return;
+  }
+
+  console.log('Status pendaftaran berhasil diubah:', status);
+}function escapeHtml(value) {
 
   const div = document.createElement('div');
 
