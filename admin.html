@@ -936,17 +936,17 @@ document.getElementById('totalU17').textContent =
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
 
     <button
-      class="btn primary small"
-      onclick="editPlayer('${player.id}')">
-      Edit
-    </button>
+  class="btn primary small"
+  onclick="editPlayer('${player.id}')">
+  Edit
+</button>
 
-    <button
-      class="btn small"
-      onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')"
-      style="background:#dc2626;color:white;">
-      Hapus
-    </button>
+<button
+  class="btn small"
+  onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')"
+  style="background:#dc2626;color:white;">
+  Hapus
+</button>
 
   </div>
 </td>
