@@ -489,6 +489,36 @@ async function deletePlayer(playerId, playerName) {
 
   await loadPlayers();
 }
+/* =========================
+   FILTER PEMAIN
+========================= */
+
+function filterPlayers() {
+
+  const searchText = document
+    .getElementById('searchPlayer')
+    .value
+    .toLowerCase()
+    .trim();
+
+  const rows = document.querySelectorAll('#playersTable tr');
+
+  rows.forEach(row => {
+
+    const nameCell = row.querySelector('td');
+
+    if (!nameCell) {
+      return;
+    }
+
+    const playerName = nameCell.textContent
+      .toLowerCase()
+      .trim();
+
+    row.style.display =
+      playerName.includes(searchText) ? '' : 'none';
+  });
+}
   /* =========================
    LOAD DATA PEMAIN
 ========================= */
