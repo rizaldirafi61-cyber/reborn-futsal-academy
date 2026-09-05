@@ -1297,14 +1297,23 @@ async function loadPosts() {
       <td>${post.title || '-'}</td>
       <td>${tanggal}</td>
       <td>
-        <button
-          class="btn"
-          onclick="deletePost(${post.id})"
-          style="background:#dc2626;color:white;"
-        >
-          Hapus
-        </button>
-      </td>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+    <button
+      class="btn primary small"
+      onclick="editPost(${post.id})">
+      Edit
+    </button>
+
+    <button
+      class="btn small"
+      onclick="deletePost(${post.id})"
+      style="background:#dc2626;color:white;">
+      Hapus
+    </button>
+
+  </div>
+</td>
     `;
 
     table.appendChild(row);
