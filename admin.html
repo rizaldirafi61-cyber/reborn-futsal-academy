@@ -331,6 +331,51 @@ async function editPlayer(playerId) {
     block: 'start'
   });
 }
+  async function updatePlayer(event) {
+
+  event.preventDefault();
+
+  const message = document.getElementById('editPlayerMessage');
+  const playerId = document.getElementById('editPlayerId').value;
+
+  message.textContent = 'Menyimpan perubahan...';
+
+  const updatedPlayer = {
+    full_name: document.getElementById('editPlayerName').value.trim(),
+    phone: document.getElementById('editPlayerPhone').value.trim(),
+    program: document.getElementById('editPlayerProgram').value,
+    position: document.getElementById('editPlayerPosition').value || null,
+    jersey_number: document.getElementById('editPlayerJersey').value
+      ? Number(document.getElementById('editPlayerJersey').value)
+      : null,
+    birth_date: document.getElementById('editPlayerBirthDate').value || null,
+    notes: document.getElementById('editPlayerNotes').value.trim() || null
+  };
+
+  const { error } = await supabaseClient
+    .from('players')
+    .update(updatedPlayer)
+    .eq('id', playerId);
+
+  if (error) {
+    message.textContent = 'Gagal menyimpan perubahan: ' + error.message;
+    return;
+  }
+
+  alert('Data pemain berhasil diperbarui.');
+
+  document.querySelector('#editPlayerForm form').reset();
+
+  hideEditPlayerForm();
+
+  await loadPlayers();
+}
+  function hideEditPlayerForm() {
+
+  document.getElementById('editPlayerForm').style.display = 'none';
+
+  document.getElementById('editPlayerMessage').textContent = '';
+}
 /* =========================
    LOAD DATA PEMAIN
 ========================= */
