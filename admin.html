@@ -785,8 +785,8 @@ async function loadPlayers() {
   document.getElementById('totalPlayers').textContent =
     data.length;
 
-  document.getElementById('newPlayers').textContent =
-    data.length;
+ document.getElementById('newPlayers').textContent =
+  data.filter(player => player.registration_status === 'Menunggu').length;
 
   if (data.length === 0) {
     table.innerHTML =
