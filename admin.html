@@ -1882,8 +1882,10 @@ async function saveAttendance(
           }
         );
 
-    if (error) throw error;
+   if (error) throw error;
 
+await loadSchedules();
+    
   } catch (error) {
 
     console.error(
