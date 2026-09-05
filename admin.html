@@ -1169,6 +1169,103 @@ async function loadSchedules() {
 
   await loadSchedules();
 }
+  async function editSchedule(scheduleId) {
+
+  const { data: schedule, error } = await supabaseClient
+    .from('training_schedules')
+    .select('*')
+    .eq('id', scheduleId)
+    .single();
+
+  if (error) {
+    alert('Gagal mengambil data jadwal: ' + error.message);
+    return;
+  }
+
+  const trainingDate = prompt(
+    'Tanggal latihan (YYYY-MM-DD):',
+    schedule.training_date || ''
+  );
+
+  if (trainingDate === null) return;
+
+  const startTime = prompt(
+    'Jam mulai (HH:MM):',
+    schedule.start_time
+      ? schedule.start_time.substring(0, 5)
+      : ''
+  );
+
+  if (startTime === null) return;
+
+  const endTime = prompt(
+    'Jam selesai (HH:MM):',
+    schedule.end_time
+      ? schedule.end_time.substring(0, 5)
+      : ''
+  );
+
+  if (endTime === null) return;
+
+  const program = prompt(
+    'Kelompok umur (U14, U15, U16, atau U17):',
+    schedule.program || ''
+  );
+
+  if (program === null) return;
+
+  const location = prompt(
+    'Lokasi latihan:',
+    schedule.location || ''
+  );
+
+  if (location === null) return;
+
+  const notes = prompt(
+    'Catatan:',
+    schedule.notes || ''
+  );
+
+  if (notes === null) return;
+
+  const cleanProgram = program.toUpperCase().trim();
+
+  if (!['U14', 'U15', 'U16', 'U17'].includes(cleanProgram)) {
+    alert('Kelompok umur harus U14, U15, U16, atau U17.');
+    return;
+  }
+
+  if (!trainingDate.trim()) {
+    alert('Tanggal latihan wajib diisi.');
+    return;
+  }
+
+  if (!startTime.trim() || !endTime.trim()) {
+    alert('Jam mulai dan jam selesai wajib diisi.');
+    return;
+  }
+
+  const { error: updateError } = await supabaseClient
+    .from('training_schedules')
+    .update({
+      training_date: trainingDate.trim(),
+      start_time: startTime.trim(),
+      end_time: endTime.trim(),
+      program: cleanProgram,
+      location: location.trim() || null,
+      notes: notes.trim() || null
+    })
+    .eq('id', scheduleId);
+
+  if (updateError) {
+    alert('Gagal memperbarui jadwal: ' + updateError.message);
+    return;
+  }
+
+  alert('Jadwal latihan berhasil diperbarui.');
+
+  await loadSchedules();
+}
 /* =========================
    LOGOUT
 ========================= */
