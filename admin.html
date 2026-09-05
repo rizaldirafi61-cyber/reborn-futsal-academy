@@ -518,6 +518,8 @@ const supabaseClient = supabase.createClient(
    CEK LOGIN
 ========================= */
 
+let currentRole = null;
+
 async function checkAuth() {
 
   const {
@@ -530,25 +532,46 @@ async function checkAuth() {
     return false;
   }
 
-  // Cek apakah akun ini terdaftar sebagai admin
-  const { data: admin, error } = await supabaseClient
+  // Cek Admin
+  const { data: admin, error: adminError } = await supabaseClient
     .from('admin_users')
     .select('user_id')
     .eq('user_id', session.user.id)
     .maybeSingle();
 
-  // Bukan admin
-  if (error || !admin) {
-    await supabaseClient.auth.signOut();
-
-    alert('Akun ini tidak memiliki akses admin.');
-
-    window.location.href = 'login.html';
-
-    return false;
+  if (adminError) {
+    console.error('Gagal cek admin:', adminError);
   }
 
-  return true;
+  if (admin) {
+    currentRole = 'admin';
+    return true;
+  }
+
+  // Cek Management
+  const { data: management, error: managementError } = await supabaseClient
+    .from('management_users')
+    .select('user_id')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if (managementError) {
+    console.error('Gagal cek management:', managementError);
+  }
+
+  if (management) {
+    currentRole = 'management';
+    return true;
+  }
+
+  // Bukan Admin dan bukan Management
+  await supabaseClient.auth.signOut();
+
+  alert('Akun ini tidak memiliki akses dashboard.');
+
+  window.location.href = 'login.html';
+
+  return false;
 }
 
 /* =========================
