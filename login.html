@@ -94,9 +94,39 @@ loginForm.addEventListener('submit', async function(e) {
     return;
   }
 
-  if (data.session) {
+ if (data.session) {
+
+  const userId = data.session.user.id;
+
+  // Cek apakah akun adalah Admin
+  const { data: admin } = await supabaseClient
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (admin) {
     window.location.href = 'admin.html';
+    return;
   }
+
+  // Cek apakah akun adalah Management
+  const { data: management } = await supabaseClient
+    .from('management_users')
+    .select('user_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (management) {
+    window.location.href = 'management.html';
+    return;
+  }
+
+  // Akun tidak memiliki akses
+  await supabaseClient.auth.signOut();
+
+  alert('Akun ini tidak memiliki akses.');
+}
 });
 </script>
 
