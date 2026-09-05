@@ -296,6 +296,40 @@ async function addPlayer(event) {
   hideAddPlayerForm();
 
   await loadPlayers();
+}/* =========================
+   EDIT PEMAIN
+========================= */
+
+async function editPlayer(playerId) {
+
+  const { data: player, error } = await supabaseClient
+    .from('players')
+    .select('id, full_name, phone, program, position, jersey_number, birth_date, notes')
+    .eq('id', playerId)
+    .single();
+
+  if (error) {
+    alert('Gagal mengambil data pemain: ' + error.message);
+    return;
+  }
+
+  document.getElementById('editPlayerId').value = player.id;
+  document.getElementById('editPlayerName').value = player.full_name || '';
+  document.getElementById('editPlayerPhone').value = player.phone || '';
+  document.getElementById('editPlayerProgram').value = player.program || '';
+  document.getElementById('editPlayerPosition').value = player.position || '';
+  document.getElementById('editPlayerJersey').value = player.jersey_number || '';
+  document.getElementById('editPlayerBirthDate').value = player.birth_date || '';
+  document.getElementById('editPlayerNotes').value = player.notes || '';
+
+  document.getElementById('editPlayerMessage').textContent = '';
+
+  document.getElementById('editPlayerForm').style.display = 'block';
+
+  document.getElementById('editPlayerForm').scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
 }
 /* =========================
    LOAD DATA PEMAIN
