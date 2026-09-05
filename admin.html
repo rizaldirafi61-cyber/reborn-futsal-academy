@@ -852,7 +852,28 @@ async function loadPlayers() {
       <td>${escapeHtml(player.program || '-')}</td>
 
       <td>${date}</td>
+<td>
+  <select
+    onchange="updateRegistrationStatus('${player.id}', this.value)"
+    style="padding:6px 8px; border-radius:8px; border:1px solid #ddd;"
+  >
+    <option value="Menunggu" ${player.registration_status === 'Menunggu' ? 'selected' : ''}>
+      Menunggu
+    </option>
 
+    <option value="Diverifikasi" ${player.registration_status === 'Diverifikasi' ? 'selected' : ''}>
+      Diverifikasi
+    </option>
+
+    <option value="Diterima" ${player.registration_status === 'Diterima' ? 'selected' : ''}>
+      Diterima
+    </option>
+
+    <option value="Ditolak" ${player.registration_status === 'Ditolak' ? 'selected' : ''}>
+      Ditolak
+    </option>
+  </select>
+</td>
       <td>
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
           ${documentHtml}
