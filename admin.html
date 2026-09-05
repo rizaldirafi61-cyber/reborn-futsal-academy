@@ -832,7 +832,17 @@ async function loadPlayers() {
 
  document.getElementById('newPlayers').textContent =
   data.filter(player => player.registration_status === 'Menunggu').length;
+document.getElementById('totalU14').textContent =
+  data.filter(player => player.program === 'U14').length;
 
+document.getElementById('totalU15').textContent =
+  data.filter(player => player.program === 'U15').length;
+
+document.getElementById('totalU16').textContent =
+  data.filter(player => player.program === 'U16').length;
+
+document.getElementById('totalU17').textContent =
+  data.filter(player => player.program === 'U17').length;
   if (data.length === 0) {
     table.innerHTML =
       '<tr><td colspan="6">Belum ada data pendaftar.</td></tr>';
