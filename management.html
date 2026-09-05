@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Management - Reborn Futsal Academy</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #f5f7f6;
+      font-family: Arial, sans-serif;
+    }
+
+    .management-page {
+      min-height: 100vh;
+    }
+
+    .management-header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 18px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #0b8f3c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-subtitle {
+      display: block;
+      font-size: 11px;
+      color: #0b8f3c;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .logout-btn {
+      border: 0;
+      background: #dc2626;
+      color: white;
+      padding: 11px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .management-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 35px 20px 60px;
+    }
+
+    .page-title {
+      margin-bottom: 25px;
+    }
+
+    .page-title h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+    }
+
+    .page-title p {
+      margin: 0;
+      color: #64748b;
+    }
+
+    .info-card {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+
+    .info-card h2 {
+      margin-top: 0;
+      margin-bottom: 6px;
+    }
+
+    .info-card-description {
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+    }
+
+    .filters input {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px 12px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    td {
+      padding: 15px 12px;
+      border-bottom: 1px solid #eef2f3;
+      color: #1f2937;
+      font-size: 14px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-menunggu {
+      background: #fff7ed;
+      color: #c2410c;
+    }
+
+    .status-diverifikasi {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .status-diterima {
+      background: #ecfdf5;
+      color: #15803d;
+    }
+
+    .status-ditolak {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 30px;
+      color: #64748b;
+    }
+
+    @media (max-width: 700px) {
+      .management-header {
+        padding: 15px;
+      }
+
+      .management-main {
+        padding: 25px 12px 40px;
+      }
+
+      .page-title h1 {
+        font-size: 24px;
+      }
+
+      .info-card {
+        padding: 16px;
+      }
+
+      .logout-btn {
+        padding: 9px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="management-page">
+
+  <header class="management-header">
+
+    <div class="brand">
+      <div class="brand-mark">RFA</div>
+
+      <div>
+        <div class="brand-title">Reborn</div>
+        <span class="brand-subtitle">FUTSAL ACADEMY</span>
+      </div>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">
+      Logout
+    </button>
+
+  </header>
+
+
+  <main class="management-main">
+
+    <div class="page-title">
+      <h1>Data Pemain</h1>
+      <p>Halaman khusus Management — hanya dapat melihat data pemain yang terdaftar.</p>
+    </div>
+
+
+    <section class="info-card">
+
+      <h2>Daftar Pemain Reborn</h2>
+
+      <div class="info-card-description">
+        Management memiliki akses baca saja terhadap data pemain.
+      </div>
+
+
+      <div class="filters">
+
+        <input
+          type="text"
+          id="searchPlayer"
+          placeholder="🔎 Cari nama pemain..."
+          oninput="filterPlayers()"
+        >
+
+        <select id="filterProgram" onchange="filterPlayers()">
+          <option value="">Semua Kelompok Umur</option>
+          <option value="U14">U14</option>
+          <option value="U15">U15</option>
+          <option value="U16">U16</option>
+          <option value="U17">U17</option>
+        </select>
+
+        <select id="filterStatus" onchange="filterPlayers()">
+          <option value="">Semua Status</option>
+          <option value="Menunggu">Menunggu</option>
+          <option value="Diverifikasi">Diverifikasi</option>
+          <option value="Diterima">Diterima</option>
+          <option value="Ditolak">Ditolak</option>
+        </select>
+
+      </div>
+
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Nama Pemain</th>
+              <th>WhatsApp</th>
+              <th>Kelompok Umur</th>
+              <th>Tanggal Daftar</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="playersTable">
+
+            <tr>
+              <td colspan="5" class="empty-message">
+                Memuat data pemain...
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+  'https://txgwdcxsmgclbgbxdbsf.supabase.co';
+
+const SUPABASE_PUBLISHABLE_KEY =
+  'sb_publishable_g3Tsr8PRmwhgGvFcGGJOuOg_0R6zCrr6';
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+
+let allPlayers = [];
+
+
+async function checkManagement() {
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    window.location.href = 'login.html';
+    return false;
+  }
+
+
+  const {
+    data: management,
+    error
+  } = await supabaseClient
+    .from('management_users')
+    .select('user_id')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      'Gagal memeriksa Management:',
+      error
+    );
+
+    alert(
+      'Terjadi kesalahan saat memeriksa akses.'
+    );
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href = 'login.html';
+
+    return false;
+  }
+
+
+  if (!management) {
+
+    alert(
+      'Akun ini bukan akun Management.'
+    );
+
+    await supabaseClient.auth.signOut();
+
+    window.location.href = 'login.html';
+
+    return false;
+  }
+
+
+  return true;
+}
+
+
+async function loadPlayers() {
+
+  const table =
+    document.getElementById('playersTable');
+
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="5" class="empty-message">
+        Memuat data pemain...
+      </td>
+    </tr>
+  `;
+
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from('players')
+    .select(
+      'id, full_name, phone, program, join_date, status'
+    )
+    .order(
+      'created_at',
+      { ascending: false }
+    );
+
+
+  if (error) {
+
+    console.error(
+      'Gagal mengambil pemain:',
+      error
+    );
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-message">
+          Gagal memuat data pemain.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  allPlayers = data || [];
+
+  renderPlayers(allPlayers);
+}
+
+
+function renderPlayers(players) {
+
+  const table =
+    document.getElementById('playersTable');
+
+
+  table.innerHTML = '';
+
+
+  if (!players.length) {
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-message">
+          Belum ada pemain terdaftar.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+
+  players.forEach(player => {
+
+    const row =
+      document.createElement('tr');
+
+
+    const status =
+      player.status || 'Menunggu';
+
+
+    let statusClass =
+      'status-menunggu';
+
+
+    if (status === 'Diverifikasi') {
+      statusClass = 'status-diverifikasi';
+    }
+
+    if (status === 'Diterima') {
+      statusClass = 'status-diterima';
+    }
+
+    if (status === 'Ditolak') {
+      statusClass = 'status-ditolak';
+    }
+
+
+    const tanggal =
+      player.join_date
+        ? new Date(player.join_date)
+            .toLocaleDateString(
+              'id-ID',
+              {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              }
+            )
+        : '-';
+
+
+    row.innerHTML = `
+
+      <td>
+        <strong>
+          ${escapeHtml(player.full_name || '-')}
+        </strong>
+      </td>
+
+      <td>
+        ${escapeHtml(player.phone || '-')}
+      </td>
+
+      <td>
+        ${escapeHtml(player.program || '-')}
+      </td>
+
+      <td>
+        ${tanggal}
+      </td>
+
+      <td>
+        <span class="status ${statusClass}">
+          ${escapeHtml(status)}
+        </span>
+      </td>
+
+    `;
+
+
+    table.appendChild(row);
+
+  });
+
+}
+
+
+function filterPlayers() {
+
+  const search =
+    document
+      .getElementById('searchPlayer')
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  const program =
+    document
+      .getElementById('filterProgram')
+      .value;
+
+
+  const status =
+    document
+      .getElementById('filterStatus')
+      .value;
+
+
+  const filtered =
+    allPlayers.filter(player => {
+
+      const name =
+        (player.full_name || '')
+          .toLowerCase();
+
+
+      const matchesName =
+        !search ||
+        name.includes(search);
+
+
+      const matchesProgram =
+        !program ||
+        player.program === program;
+
+
+      const matchesStatus =
+        !status ||
+        player.status === status;
+
+
+      return (
+        matchesName &&
+        matchesProgram &&
+        matchesStatus
+      );
+
+    });
+
+
+  renderPlayers(filtered);
+}
+
+
+function escapeHtml(value) {
+
+  return String(value)
+
+    .replaceAll('&', '&amp;')
+
+    .replaceAll('<', '&lt;')
+
+    .replaceAll('>', '&gt;')
+
+    .replaceAll('"', '&quot;')
+
+    .replaceAll("'", '&#039;');
+
+}
+
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  window.location.href = 'login.html';
+
+}
+
+
+(async function() {
+
+  const allowed =
+    await checkManagement();
+
+
+  if (allowed) {
+    await loadPlayers();
+  }
+
+})();
+
+</script>
+
+</body>
+</html>
