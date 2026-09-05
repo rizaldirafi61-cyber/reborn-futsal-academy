@@ -935,27 +935,20 @@ document.getElementById('totalU17').textContent =
       <td>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
 
-          <button
-            class="btn primary small"
-            onclick="editPlayer('${player.id}')">
-            Edit
-          </button>
+  <button
+    class="btn primary small"
+    onclick="editPost(${post.id})">
+    Edit
+  </button>
 
-          <button
-            class="btn small"
-            onclick="openWhatsApp('${escapeHtml(player.phone || '')}')">
-            WhatsApp
-          </button>
+  <button
+    class="btn small"
+    onclick="deletePost(${post.id})"
+    style="background:#dc2626;color:white;">
+    Hapus
+  </button>
 
-          <button
-            class="btn small"
-            onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')">
-            Hapus
-          </button>
-
-        </div>
-      </td>
-    `;
+</div>
 
     table.appendChild(row);
   });
