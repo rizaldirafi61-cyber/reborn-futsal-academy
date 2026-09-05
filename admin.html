@@ -723,9 +723,9 @@ function filterPlayers() {
   const program =
     document.getElementById('filterProgram')?.value || '';
 
-  const rows = document.querySelectorAll(
-    '#playersTableBody tr'
-  );
+ const rows = document.querySelectorAll(
+  '#playersTable tr'
+);
 
   rows.forEach(row => {
     const rowText = row.textContent.toLowerCase();
