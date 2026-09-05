@@ -1399,12 +1399,22 @@ async function loadPosts() {
       Edit
     </button>
 
-    <button
-      class="btn small"
-      onclick="deletePost(${post.id})"
-      style="background:#dc2626;color:white;">
-      Hapus
-    </button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+  <button
+    class="btn primary small"
+    onclick="editSchedule('${schedule.id}')">
+    Edit
+  </button>
+
+  <button
+    class="btn small"
+    onclick="deleteSchedule('${schedule.id}')"
+    style="background:#dc2626;color:white;">
+    Hapus
+  </button>
+
+</div>
 
   </div>
 </td>
