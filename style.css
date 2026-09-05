@@ -359,3 +359,20 @@ nav{gap:12px}.hero{grid-template-columns:1fr;padding-top:55px}.hero-visual{heigh
     width:100%;
   }
 }
+/* STATUS PENDAFTARAN */
+#playersTable select {
+  min-width: 125px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#playersTable select:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
