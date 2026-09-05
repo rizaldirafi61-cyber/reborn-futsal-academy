@@ -893,6 +893,30 @@ async function loadSchedules() {
     table.appendChild(row);
   });
 }
+  async function deleteSchedule(scheduleId) {
+
+  const confirmed = confirm(
+    'Apakah Anda yakin ingin menghapus jadwal ini?'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('training_schedules')
+    .delete()
+    .eq('id', scheduleId);
+
+  if (error) {
+    alert('Gagal menghapus jadwal: ' + error.message);
+    return;
+  }
+
+  alert('Jadwal berhasil dihapus.');
+
+  await loadSchedules();
+}
 /* =========================
    LOGOUT
 ========================= */
