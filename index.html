@@ -154,12 +154,56 @@
       <p>Isi data singkat untuk bergabung dengan Reborn Futsal Academy.</p>
     </div>
     <form onsubmit="registerDemo(event)">
-      <input required placeholder="Nama lengkap">
-      <input required type="tel" placeholder="Nomor WhatsApp">
-      <select required><option value="">Pilih program</option><option>Kids Academy</option><option>Junior</option><option>Senior</option><option>Goalkeeper</option></select>
-      <button class="btn primary full">Kirim Pendaftaran →</button>
-      <small class="form-note">* Pendaftaran online aktif. Data akan tersimpan secara aman ke sistem Reborn Futsal Academy.</small>
-    </form>
+  <input id="fullName" required placeholder="Nama lengkap">
+
+  <input id="phone" required type="tel" placeholder="Nomor WhatsApp">
+
+  <select id="program" required>
+    <option value="">Pilih program</option>
+    <option>Kids Academy</option>
+    <option>Junior</option>
+    <option>Senior</option>
+    <option>Goalkeeper</option>
+  </select>
+
+  <label for="kkFile" style="font-weight:700;margin-top:10px;">
+    Kartu Keluarga (KK) <span style="color:red;">*</span>
+  </label>
+
+  <input
+    id="kkFile"
+    required
+    type="file"
+    accept=".pdf,.jpg,.jpeg,.png"
+  >
+
+  <small class="form-note">
+    Format: PDF, JPG, JPEG, PNG. Maksimal 5 MB.
+  </small>
+
+  <label for="aktaFile" style="font-weight:700;margin-top:10px;">
+    Akta Kelahiran <span style="color:red;">*</span>
+  </label>
+
+  <input
+    id="aktaFile"
+    required
+    type="file"
+    accept=".pdf,.jpg,.jpeg,.png"
+  >
+
+  <small class="form-note">
+    Format: PDF, JPG, JPEG, PNG. Maksimal 5 MB.
+  </small>
+
+  <button class="btn primary full" type="submit">
+    Kirim Pendaftaran →
+  </button>
+
+  <small class="form-note">
+    * KK dan Akta Kelahiran wajib diunggah untuk proses pendaftaran.
+  </small>
+</form>
   </div>
 </section>
 
@@ -186,13 +230,48 @@ async function registerDemo(e) {
   e.preventDefault();
 
   const form = e.target;
-  const inputs = form.querySelectorAll('input, select');
 
-  const full_name = inputs[0].value.trim();
-  const phone = inputs[1].value.trim();
-  const program = inputs[2].value;
+  const full_name = document.getElementById('fullName').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const program = document.getElementById('program').value;
 
-  const { error } = await supabaseClient
+  const kkFile = document.getElementById('kkFile').files[0];
+  const aktaFile = document.getElementById('aktaFile').files[0];
+
+  if (!kkFile || !aktaFile) {
+    alert('KK dan Akta Kelahiran wajib diunggah.');
+    return;
+  }
+
+  const allowedTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png'
+  ];
+
+  const maxSize = 5 * 1024 * 1024;
+
+  if (!allowedTypes.includes(kkFile.type)) {
+    alert('File KK harus PDF, JPG, JPEG, atau PNG.');
+    return;
+  }
+
+  if (!allowedTypes.includes(aktaFile.type)) {
+    alert('File Akta Kelahiran harus PDF, JPG, JPEG, atau PNG.');
+    return;
+  }
+
+  if (kkFile.size > maxSize) {
+    alert('Ukuran file KK maksimal 5 MB.');
+    return;
+  }
+
+  if (aktaFile.size > maxSize) {
+    alert('Ukuran file Akta Kelahiran maksimal 5 MB.');
+    return;
+  }
+
+  const { data: player, error: playerError } = await supabaseClient
     .from('players')
     .insert([
       {
@@ -200,6 +279,76 @@ async function registerDemo(e) {
         phone: phone,
         program: program
       }
+    ])
+    .select('id')
+    .single();
+
+  if (playerError) {
+    alert('Pendaftaran gagal: ' + playerError.message);
+    return;
+  }
+
+  const playerId = player.id;
+
+  const kkPath = `${playerId}/kk-${crypto.randomUUID()}.${getFileExtension(kkFile.name)}`;
+  const aktaPath = `${playerId}/akta-kelahiran-${crypto.randomUUID()}.${getFileExtension(aktaFile.name)}`;
+
+  const { error: kkUploadError } = await supabaseClient.storage
+    .from('player-documents')
+    .upload(kkPath, kkFile);
+
+  if (kkUploadError) {
+    alert('Upload KK gagal: ' + kkUploadError.message);
+    return;
+  }
+
+  const { error: aktaUploadError } = await supabaseClient.storage
+    .from('player-documents')
+    .upload(aktaPath, aktaFile);
+
+  if (aktaUploadError) {
+    alert('Upload Akta Kelahiran gagal: ' + aktaUploadError.message);
+    return;
+  }
+
+  const { error: documentError } = await supabaseClient
+    .from('player_documents')
+    .insert([
+      {
+        player_id: playerId,
+        document_type: 'kk',
+        storage_path: kkPath,
+        original_name: kkFile.name,
+        mime_type: kkFile.type,
+        file_size: kkFile.size
+      },
+      {
+        player_id: playerId,
+        document_type: 'akta_kelahiran',
+        storage_path: aktaPath,
+        original_name: aktaFile.name,
+        mime_type: aktaFile.type,
+        file_size: aktaFile.size
+      }
+    ]);
+
+  if (documentError) {
+    alert('Data dokumen gagal disimpan: ' + documentError.message);
+    return;
+  }
+
+  alert('Pendaftaran berhasil! Data dan dokumen sudah tersimpan.');
+
+  form.reset();
+}
+
+
+function getFileExtension(fileName) {
+  const parts = fileName.split('.');
+  return parts.length > 1
+    ? parts.pop().toLowerCase()
+    : 'file';
+}
     ]);
 
   if (error) {
