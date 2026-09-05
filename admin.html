@@ -262,7 +262,21 @@
     style="width:100%; max-width:400px;"
   >
 </div>
-      <div id="loading" class="muted">
+   <div style="margin:10px 0 20px;">
+  <select
+    id="filterStatus"
+    onchange="filterPlayers()"
+    style="width:100%; max-width:400px; padding:10px;"
+  >
+    <option value="">Semua Status</option>
+    <option value="Menunggu">Menunggu</option>
+    <option value="Diverifikasi">Diverifikasi</option>
+    <option value="Diterima">Diterima</option>
+    <option value="Ditolak">Ditolak</option>
+  </select>
+</div>
+      
+    <div id="loading" class="muted">
         Memuat data...
       </div>
 
