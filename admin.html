@@ -1135,22 +1135,21 @@ async function loadSchedules() {
 
     <button
       class="btn primary small"
-      onclick="editPost(${post.id})">
+      onclick="editPlayer('${player.id}')">
       Edit
     </button>
 
     <button
       class="btn small"
-      onclick="deletePost(${post.id})"
+      onclick="deletePlayer('${player.id}', '${escapeHtml(player.full_name || '')}')"
       style="background:#dc2626;color:white;">
       Hapus
     </button>
 
   </div>
 </td>
-</td>
-    `;
-
+`;
+    
     table.appendChild(row);
   });
 }
