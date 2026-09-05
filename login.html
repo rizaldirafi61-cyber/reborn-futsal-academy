@@ -120,23 +120,27 @@ if (data.session) {
   }
 
   // Cek Management
-  const {
-    data: management,
-    error: managementError
-  } = await supabaseClient
-    .from('management_users')
-    .select('user_id')
-    .eq('user_id', userId)
-    .maybeSingle();
+  // Cek Management melalui fungsi database
+const {
+  data: management,
+  error: managementError
+} = await supabaseClient
+  .rpc('is_management_user');
 
-  console.log('Management:', management);
-  console.log('Management Error:', managementError);
+console.log('Management:', management);
+console.log('Management Error:', managementError);
 
-  if (managementError) {
-    loginMessage.textContent =
-      'Error Management: ' + managementError.message;
-    return;
-  }
+if (managementError) {
+  loginMessage.textContent =
+    'Error cek Management: ' + managementError.message;
+  console.error('Management Error:', managementError);
+  return;
+}
+
+if (management === true) {
+  window.location.href = 'management.html';
+  return;
+}
 
   if (management) {
     window.location.href = 'management.html';
