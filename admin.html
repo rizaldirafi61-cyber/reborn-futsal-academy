@@ -695,60 +695,38 @@ async function deletePlayer(playerId, playerName) {
 ========================= */
 
 function filterPlayers() {
+  const search =
+    document.getElementById('searchPlayer')?.value
+      .toLowerCase()
+      .trim() || '';
 
-  const searchText = document
-    .getElementById('searchPlayer')
-    .value
-    .toLowerCase()
-    .trim();
+  const status =
+    document.getElementById('filterStatus')?.value || '';
 
-  const selectedStatus = document
-    .getElementById('filterStatus')
-    .value;
+  const program =
+    document.getElementById('filterProgram')?.value || '';
 
-  const rows = document.querySelectorAll('#playersTable tr');
+  const rows = document.querySelectorAll(
+    '#playersTableBody tr'
+  );
 
   rows.forEach(row => {
+    const rowText = row.textContent.toLowerCase();
 
-    const cells = row.querySelectorAll('td');
+    const statusMatch =
+      !status || rowText.includes(status.toLowerCase());
 
-    if (cells.length < 7) {
-      return;
-    }
+    const programMatch =
+      !program || rowText.includes(program.toLowerCase());
 
-    const playerName = cells[0].textContent
-      .toLowerCase()
-      .trim();
-
-    const playerStatus = cells[4].querySelector('select')
-      ? cells[4].querySelector('select').value
-      : '';
-
-    const matchName =
-      playerName.includes(searchText);
-
-    const matchStatus =
-      selectedStatus === '' ||
-      playerStatus === selectedStatus;
+    const searchMatch =
+      !search || rowText.includes(search);
 
     row.style.display =
-      matchName && matchStatus ? '' : 'none';
+      statusMatch && programMatch && searchMatch
+        ? ''
+        : 'none';
   });
-}
-
-  function openWhatsApp(phone) {
-  if (!phone) {
-    alert('Nomor WhatsApp pemain belum tersedia.');
-    return;
-  }
-
-  let cleanPhone = phone.replace(/\D/g, '');
-
-  if (cleanPhone.startsWith('0')) {
-    cleanPhone = '62' + cleanPhone.substring(1);
-  }
-
-  window.open('https://wa.me/' + cleanPhone, '_blank');
 }
   /* =========================
    LOAD DATA PEMAIN
