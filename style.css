@@ -376,3 +376,43 @@ nav{gap:12px}.hero{grid-template-columns:1fr;padding-top:55px}.hero-visual{heigh
   border-color: #16a34a;
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
 }
+/* TOMBOL AKSI DATA PENDAFTAR */
+#playersTable td:last-child {
+  white-space: nowrap;
+}
+
+#playersTable td:last-child button {
+  border: none;
+  border-radius: 9px;
+  padding: 8px 12px;
+  margin: 3px 2px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#playersTable td:last-child button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* Tombol Edit */
+#playersTable td:last-child button:first-child {
+  background: #16a34a;
+  color: white;
+}
+
+/* Tombol WhatsApp */
+#playersTable td:last-child button:nth-child(2) {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+/* Tombol Hapus */
+#playersTable td:last-child button:nth-child(3) {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
