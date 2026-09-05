@@ -1111,7 +1111,8 @@ async function loadSchedules() {
     table.innerHTML = `
       <tr>
         <td colspan="6">
-          Gagal memuat jadwal: ${escapeHtml(error.message)}
+          Gagal memuat jadwal:
+          ${escapeHtml(error.message)}
         </td>
       </tr>
     `;
@@ -1121,20 +1122,73 @@ async function loadSchedules() {
   if (!data || data.length === 0) {
     table.innerHTML = `
       <tr>
-        <td colspan="6">Belum ada jadwal latihan.</td>
+        <td colspan="6">
+          Belum ada jadwal latihan.
+        </td>
       </tr>
     `;
     return;
   }
 
+  /*
+    Ambil semua data absensi
+    untuk menghitung rekap setiap jadwal
+  */
+
+  const {
+    data: attendanceData,
+    error: attendanceError
+  } = await supabaseClient
+    .from('training_attendance')
+    .select(
+      'schedule_id, attendance_status'
+    );
+
+  if (attendanceError) {
+    console.error(
+      'Gagal mengambil data absensi:',
+      attendanceError
+    );
+  }
+
+  /*
+    Buat rekap absensi berdasarkan schedule_id
+  */
+
+  const attendanceSummary = {};
+
+  (attendanceData || []).forEach(item => {
+
+    if (!attendanceSummary[item.schedule_id]) {
+      attendanceSummary[item.schedule_id] = {
+        hadir: 0,
+        tidakHadir: 0
+      };
+    }
+
+    if (
+      item.attendance_status === 'Hadir'
+    ) {
+      attendanceSummary[item.schedule_id].hadir++;
+    }
+
+    if (
+      item.attendance_status === 'Tidak Hadir'
+    ) {
+      attendanceSummary[item.schedule_id].tidakHadir++;
+    }
+  });
+
   table.innerHTML = '';
 
   data.forEach(schedule => {
+
     const row = document.createElement('tr');
 
     const date = schedule.training_date
-      ? new Date(schedule.training_date + 'T00:00:00')
-          .toLocaleDateString('id-ID')
+      ? new Date(
+          schedule.training_date + 'T00:00:00'
+        ).toLocaleDateString('id-ID')
       : '-';
 
     const start = schedule.start_time
@@ -1145,39 +1199,92 @@ async function loadSchedules() {
       ? schedule.end_time.substring(0, 5)
       : '-';
 
+    const summary =
+      attendanceSummary[schedule.id] || {
+        hadir: 0,
+        tidakHadir: 0
+      };
+
     row.innerHTML = `
-      <td>${date}</td>
-      <td>${start} - ${end}</td>
-      <td>${escapeHtml(schedule.program || '-')}</td>
-      <td>${escapeHtml(schedule.location || '-')}</td>
-      <td>${escapeHtml(schedule.notes || '-')}</td>
-     <td>
- <td>
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <td>
+        ${date}
+      </td>
 
-    <button
-      class="btn primary small"
-      onclick="editSchedule('${schedule.id}')">
-      Edit
-    </button>
+      <td>
+        ${start} - ${end}
+      </td>
 
-    <button
-  class="btn small"
-  onclick="openAttendance('${schedule.id}')">
-  📋 Absensi
-</button>
+      <td>
+        ${escapeHtml(
+          schedule.program || '-'
+        )}
+      </td>
 
-    <button
-      class="btn small"
-      onclick="deleteSchedule('${schedule.id}')"
-      style="background:#dc2626;color:white;">
-      Hapus
-    </button>
+      <td>
+        ${escapeHtml(
+          schedule.location || '-'
+        )}
+      </td>
 
-  </div>
-</td>
-`;
-    
+      <td>
+        ${escapeHtml(
+          schedule.notes || '-'
+        )}
+      </td>
+
+      <td>
+        <div
+          style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            align-items:center;
+          "
+        >
+
+          <span
+            id="attendance-summary-${schedule.id}"
+            style="
+              display:block;
+              width:100%;
+              font-size:13px;
+              font-weight:600;
+              margin-bottom:3px;
+            "
+          >
+            📊 Hadir ${summary.hadir}
+            | Tidak Hadir ${summary.tidakHadir}
+          </span>
+
+          <button
+            class="btn small"
+            onclick="openAttendance('${schedule.id}')"
+          >
+            📋 Absensi
+          </button>
+
+          <button
+            class="btn primary small"
+            onclick="editSchedule('${schedule.id}')"
+          >
+            Edit
+          </button>
+
+          <button
+            class="btn small"
+            onclick="deleteSchedule('${schedule.id}')"
+            style="
+              background:#dc2626;
+              color:white;
+            "
+          >
+            Hapus
+          </button>
+
+        </div>
+      </td>
+    `;
+
     table.appendChild(row);
   });
 }
