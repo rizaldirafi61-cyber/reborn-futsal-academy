@@ -9,7 +9,6 @@
 <meta name="keywords" content="Reborn Futsal Academy, akademi futsal, sekolah futsal, latihan futsal, futsal Indonesia">
 <meta name="robots" content="index, follow">
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -256,16 +255,20 @@
   <div class="footer-bottom"><span>© 2026 Reborn Futsal Academy. All rights reserved.</span><span>Dibuat dengan ❤️ untuk masa depan futsal Indonesia.</span></div>
 </footer>
 
+<!-- Script Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+
 <script>
-// ⚠️ PENTING: GANTI DENGAN URL DAN KEY SUPABASE ANDA YANG ASLI
+// Konfigurasi Supabase
 const SUPABASE_URL = 'https://txgwdcxsmgclbgbxdbsf.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_g3Tsr8PRmwhGvFcGGJOuOg_0R6zCrr6'; // Ganti dengan key 'anon' yang dimulai dengan 'eyJ...'
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_g3Tsr8PRmwhGvFcGGJOuOg_0R6zCrr6';
 
 let supabaseClient;
 try {
   supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  console.log('✅ Supabase berhasil dimuat');
 } catch (error) {
-  console.error('Gagal inisialisasi Supabase:', error);
+  console.error('❌ Gagal inisialisasi Supabase:', error);
 }
 
 function safeTrim(value) {
@@ -275,8 +278,16 @@ function safeTrim(value) {
   return String(value).trim();
 }
 
+function getFileExtension(fileName) {
+  if (!fileName) return 'file';
+  const parts = fileName.split('.');
+  return parts.length > 1 ? parts.pop().toLowerCase() : 'file';
+}
+
+// Fungsi Register Demo
 async function registerDemo(e) {
   e.preventDefault();
+  console.log('📝 Form submit dipanggil!');
 
   const form = e.target;
   const button = form.querySelector('button[type="submit"]');
@@ -301,24 +312,20 @@ async function registerDemo(e) {
   button.textContent = '⏳ Mengirim...';
 
   try {
-    // Ambil nilai dari form
     const fullNameElement = document.getElementById('fullName');
     const phoneElement = document.getElementById('phone');
-    const ageGroupElement = document.getElementById('ageGroup');  ← SUDAH GANTI NAMA
+    const ageGroupElement = document.getElementById('ageGroup');
     const jerseyNumberElement = document.getElementById('jerseyNumber');
     const positionElement = document.getElementById('position');
 
-    // Baca nilainya
     const full_name = fullNameElement.value.trim();
     const phone = phoneElement.value.trim();
-    const age_group = ageGroupElement.value.trim();  ← INI YANG PENTING
+    const age_group = ageGroupElement.value.trim();
     const jersey_number = jerseyNumberElement.value ? Number(jerseyNumberElement.value) : null;
     const position = positionElement.value.trim();
 
-    // Tampilkan di console untuk debug
-    console.log('Data yang dikirim:', { full_name, phone, age_group, jersey_number, position });
+    console.log('📦 Data yang dikirim:', { full_name, phone, age_group, jersey_number, position });
 
-    // Cek apakah semua sudah diisi
     if (!full_name) throw new Error('Nama lengkap wajib diisi.');
     if (!phone) throw new Error('Nomor WhatsApp wajib diisi.');
     if (!age_group || age_group === '') throw new Error('Kelompok umur wajib dipilih.');
@@ -326,7 +333,6 @@ async function registerDemo(e) {
     if (!position) throw new Error('Posisi wajib dipilih.');
     if (!jersey_number || jersey_number < 1 || jersey_number > 99) throw new Error('Nomor jersey wajib diisi (1-99).');
 
-    // Cek file
     const kkFileInput = document.getElementById('kkFile');
     const aktaFileInput = document.getElementById('aktaFile');
 
@@ -348,13 +354,12 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Menyimpan data pendaftar...';
 
-    // Kirim ke Supabase
     const { data: player, error: playerError } = await supabaseClient
       .from('players')
       .insert([{ 
         full_name, 
         phone, 
-        age_group,  ← GANTI DARI program KE age_group
+        age_group,
         jersey_number, 
         position 
       }])
@@ -371,7 +376,7 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Mengunggah dokumen KK...';
     const kkExtension = getFileExtension(kkFile.name);
-    const kkPath = `${playerId}/kk-${Date.now()}-${Math.random().toString(36).substring(7)}.${kkExtension}`;
+    const kkPath = playerId + '/kk-' + Date.now() + '-' + Math.random().toString(36).substring(7) + '.' + kkExtension;
 
     const { error: kkUploadError } = await supabaseClient.storage
       .from('player-documents')
@@ -384,7 +389,7 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Mengunggah Akta Kelahiran...';
     const aktaExtension = getFileExtension(aktaFile.name);
-    const aktaPath = `${playerId}/akta-kelahiran-${Date.now()}-${Math.random().toString(36).substring(7)}.${aktaExtension}`;
+    const aktaPath = playerId + '/akta-kelahiran-' + Date.now() + '-' + Math.random().toString(36).substring(7) + '.' + aktaExtension;
 
     const { error: aktaUploadError } = await supabaseClient.storage
       .from('player-documents')
@@ -423,18 +428,11 @@ async function registerDemo(e) {
     status.textContent = '❌ Pendaftaran gagal: ' + error.message;
     button.disabled = false;
     button.textContent = 'Kirim Pendaftaran →';
-    status.scrollIntoView({ behavior: 'smooth', block: 'center');
+    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
 
-function getFileExtension(fileName) {
-  if (!fileName) return 'file';
-  const parts = fileName.split('.');
-  return parts.length > 1 ? parts.pop().toLowerCase() : 'file';
-}
-</script>
-
-<script>
+// Load Public Schedules
 async function loadPublicSchedules() {
   const scheduleList = document.getElementById('publicScheduleList');
   if (!scheduleList) return;
@@ -447,7 +445,7 @@ async function loadPublicSchedules() {
       .order('start_time', { ascending: true });
 
     if (error || !data || data.length === 0) {
-      scheduleList.innerHTML = `<div class="schedule-item"><div><h3>Belum ada jadwal latihan</h3><p>Jadwal latihan akan segera diperbarui.</p></div></div>`;
+      scheduleList.innerHTML = '<div class="schedule-item"><div><h3>Belum ada jadwal latihan</h3><p>Jadwal latihan akan segera diperbarui.</p></div></div>';
       return;
     }
 
@@ -459,16 +457,7 @@ async function loadPublicSchedules() {
 
       const item = document.createElement('div');
       item.className = 'schedule-item';
-      item.innerHTML = `
-        <div class="date"><b>${date}</b></div>
-        <div>
-          <small>PROGRAM ${schedule.program || ''}</small>
-          <h3>Latihan ${schedule.program || ''}</h3>
-          <p>📍 ${schedule.location || 'Lokasi belum ditentukan'} &nbsp; • &nbsp; 🕐 ${start}–${end}</p>
-          ${schedule.notes ? `<p>${schedule.notes}</p>` : ''}
-        </div>
-        <span class="pill">Terjadwal</span>
-      `;
+      item.innerHTML = '<div class="date"><b>' + date + '</b></div><div><small>PROGRAM ' + (schedule.program || '') + '</small><h3>Latihan ' + (schedule.program || '') + '</h3><p>📍 ' + (schedule.location || 'Lokasi belum ditentukan') + ' &nbsp; • &nbsp; 🕐 ' + start + '–' + end + '</p>' + (schedule.notes ? '<p>' + schedule.notes + '</p>' : '') + '</div><span class="pill">Terjadwal</span>';
       scheduleList.appendChild(item);
     });
   } catch (error) {
@@ -476,6 +465,7 @@ async function loadPublicSchedules() {
   }
 }
 
+// Load Public Posts
 async function loadPublicPosts() {
   const postsList = document.getElementById('publicPostsList');
   if (!postsList) return;
@@ -484,7 +474,7 @@ async function loadPublicPosts() {
     const { data, error } = await supabaseClient.from('academy_posts').select('*').order('created_at', { ascending: false });
 
     if (error || !data || data.length === 0) {
-      postsList.innerHTML = `<article class="card value-card"><div class="icon">📰</div><h3>Belum ada berita</h3><p>Berita dan prestasi terbaru akan ditampilkan di sini.</p></article>`;
+      postsList.innerHTML = '<article class="card value-card"><div class="icon">📰</div><h3>Belum ada berita</h3><p>Berita dan prestasi terbaru akan ditampilkan di sini.</p></article>';
       return;
     }
 
@@ -512,14 +502,7 @@ async function loadPublicPosts() {
       const jenis = post.post_type === 'prestasi' ? 'PRESTASI' : 'BERITA';
       const article = document.createElement('article');
       article.className = 'card value-card';
-      article.innerHTML = `
-        <div class="icon">${post.post_type === 'prestasi' ? '🏆' : '📰'}</div>
-        ${post.image_url ? `<img src="${post.image_url}" alt="${post.title || 'Berita Reborn'}" style="width:100%;border-radius:12px;margin-bottom:15px;">` : ''}
-        <small style="font-weight:700;color:#0a8f3d;">${jenis}</small>
-        <h3>${post.title || '-'}</h3>
-        <p>${post.content || ''}</p>
-        <small>${tanggal}</small>
-      `;
+      article.innerHTML = '<div class="icon">' + (post.post_type === 'prestasi' ? '🏆' : '📰') + '</div>' + (post.image_url ? '<img src="' + post.image_url + '" alt="' + (post.title || 'Berita Reborn') + '" style="width:100%;border-radius:12px;margin-bottom:15px;">' : '') + '<small style="font-weight:700;color:#0a8f3d;">' + jenis + '</small><h3>' + (post.title || '-') + '</h3><p>' + (post.content || '') + '</p><small>' + tanggal + '</small>';
       postsList.appendChild(article);
     });
   } catch (error) {
@@ -527,6 +510,7 @@ async function loadPublicPosts() {
   }
 }
 
+// Load Featured Players
 async function loadFeaturedPlayers() {
   const container = document.getElementById('featuredPlayers');
   if (!container) return;
@@ -535,7 +519,7 @@ async function loadFeaturedPlayers() {
     const { data, error } = await supabaseClient.from('featured_players').select('full_name, position, jersey_number, photo_url');
 
     if (error || !data || data.length === 0) {
-      container.innerHTML = `<div class="player"><div class="avatar">-</div><h3>Belum ada pemain</h3><p>Pemain aktif belum tersedia</p></div>`;
+      container.innerHTML = '<div class="player"><div class="avatar">-</div><h3>Belum ada pemain</h3><p>Pemain aktif belum tersedia</p></div>';
       return;
     }
 
@@ -543,19 +527,22 @@ async function loadFeaturedPlayers() {
       const nomor = player.jersey_number ?? '-';
       const nama = player.full_name || '-';
       const posisi = player.position || 'Pemain';
-      const avatar = player.photo_url ? `<img src="${player.photo_url}" alt="${nama}" style="width:100%;height:200px;object-fit:cover;border-radius:12px;">` : `<div class="avatar">${nomor}</div>`;
-      return `<div class="player">${avatar}<h3>${nama}</h3><p>${posisi}</p></div>`;
+      const avatar = player.photo_url ? '<img src="' + player.photo_url + '" alt="' + nama + '" style="width:100%;height:200px;object-fit:cover;border-radius:12px;">' : '<div class="avatar">' + nomor + '</div>';
+      return '<div class="player">' + avatar + '<h3>' + nama + '</h3><p>' + posisi + '</p></div>';
     }).join('');
   } catch (error) {
     console.error('Error loading players:', error);
   }
 }
 
+// Jalankan saat halaman selesai dimuat
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('📄 Halaman selesai dimuat');
   loadPublicSchedules();
   loadPublicPosts();
   loadFeaturedPlayers();
 });
 </script>
+
 </body>
 </html>
