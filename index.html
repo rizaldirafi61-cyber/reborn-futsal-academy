@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reborn Futsal Academy</title>
   <link rel="icon" type="image/jpeg" href="logo-reborn.jpg">
-  <meta name="description" content="Reborn Futsal Academy adalah akademi futsal untuk pembinaan pemain muda melalui latihan terstruktur berdasarkan kelompok umur U14, U15, U16, dan U17.">">
+  <meta name="description" content="Reborn Futsal Academy adalah akademi futsal untuk pembinaan pemain muda melalui latihan terstruktur berdasarkan kelompok umur U14, U15, U16, dan U17.">
 <meta name="keywords" content="Reborn Futsal Academy, akademi futsal, sekolah futsal, latihan futsal, futsal Indonesia">
 <meta name="robots" content="index, follow">
 <link rel="stylesheet" href="style.css">
@@ -327,12 +327,23 @@ async function registerDemo(e) {
   try {
     const full_name = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
-  const jersey_number = document.getElementById('jerseyNumber').value;
-const position = document.getElementById('position').value;
+    const program = document.getElementById('program').value.trim();
+    const jersey_number = document.getElementById('jerseyNumber').value
+      ? Number(document.getElementById('jerseyNumber').value)
+      : null;
+    const position = document.getElementById('position').value.trim();
 
-if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
-  throw new Error('Kelompok umur wajib dipilih.');
-}
+    if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
+      throw new Error('Kelompok umur wajib dipilih.');
+    }
+
+    if (!position) {
+      throw new Error('Posisi wajib dipilih.');
+    }
+
+    if (!jersey_number) {
+      throw new Error('Nomor jersey wajib diisi.');
+    }
 
     const kkFile = document.getElementById('kkFile').files[0];
     const aktaFile = document.getElementById('aktaFile').files[0];
