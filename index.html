@@ -212,7 +212,7 @@
 
   <input id="phone" required type="tel" placeholder="Nomor WhatsApp">
 
-  <select id="program" required>
+ <select id="program" name="program" required>
   <option value="">Pilih kelompok umur</option>
   <option value="U14">U14</option>
   <option value="U15">U15</option>
@@ -309,7 +309,7 @@ async function registerDemo(e) {
   try {
     const full_name = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
-   const program = document.getElementById('program').value.trim();
+   const program = form.querySelector('select[name="program"]').value.trim();
 
 if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
   throw new Error('Kelompok umur wajib dipilih.');
