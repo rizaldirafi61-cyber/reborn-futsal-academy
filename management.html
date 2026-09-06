@@ -620,7 +620,15 @@ function renderPlayers(players) {
           ${escapeHtml(status)}
         </span>
       </td>
-
+      
+      <td>
+        <button
+          class="btn btn-secondary"
+          onclick="viewPlayerDetail('${player.id}')">
+          👁️ Detail
+        </button>
+      </td>
+      
     `;
 
 
