@@ -660,7 +660,99 @@ async function logout() {
   window.location.href = 'login.html';
 
 }
-  
+  async function loadAttendanceSummary() {
+  const table = document.getElementById('attendanceSummaryTable');
+
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="6" class="empty-message">
+        Memuat rekap absensi...
+      </td>
+    </tr>
+  `;
+
+  const { data: players, error: playersError } = await supabaseClient
+    .from('players')
+    .select('id, full_name, program')
+    .order('full_name', { ascending: true });
+
+  if (playersError) {
+    console.error('Gagal mengambil pemain:', playersError);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Gagal memuat rekap absensi.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const { data: attendance, error: attendanceError } = await supabaseClient
+    .from('training_attendance')
+    .select('player_id, attendance_status');
+
+  if (attendanceError) {
+    console.error('Gagal mengambil absensi:', attendanceError);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Gagal memuat rekap absensi.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const summary = {};
+
+  (players || []).forEach(player => {
+    summary[player.id] = {
+      full_name: player.full_name || '-',
+      program: player.program || '-',
+      hadir: 0,
+      tidakHadir: 0,
+      belumDiisi: 0
+    };
+  });
+
+  (attendance || []).forEach(record => {
+    if (!summary[record.player_id]) return;
+
+    if (record.attendance_status === 'Hadir') {
+      summary[record.player_id].hadir++;
+    } else if (record.attendance_status === 'Tidak Hadir') {
+      summary[record.player_id].tidakHadir++;
+    } else {
+      summary[record.player_id].belumDiisi++;
+    }
+  });
+
+  table.innerHTML = Object.values(summary).map(player => {
+    const totalDiisi = player.hadir + player.tidakHadir;
+
+    const percentage = totalDiisi > 0
+      ? Math.round((player.hadir / totalDiisi) * 100)
+      : 0;
+
+    return `
+      <tr>
+        <td>${player.full_name}</td>
+        <td>${player.program}</td>
+        <td>${player.hadir}</td>
+        <td>${player.tidakHadir}</td>
+        <td>${player.belumDiisi}</td>
+        <td>${percentage}%</td>
+      </tr>
+    `;
+  }).join('');
+}
 async function loadSchedules() {
   const table = document.getElementById('scheduleTable');
 
