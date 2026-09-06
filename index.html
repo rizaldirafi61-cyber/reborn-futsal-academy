@@ -743,11 +743,11 @@ async function loadFeaturedPlayers() {
 
   container.innerHTML = data.map(player => {
     const nomor = player.jersey_number ?? '-';
-    const nama = escapeHtml(player.full_name || '-');
-    const posisi = escapeHtml(player.position || 'Pemain');
+   const nama = player.full_name || '-';
+const posisi = player.position || 'Pemain';
 
     const avatar = player.photo_url
-      ? `<img src="${escapeHtml(player.photo_url)}" alt="${nama}">`
+     `<img src="${player.photo_url}" alt="${nama}">`
       : `<div class="avatar">${nomor}</div>`;
 
     return `
