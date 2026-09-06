@@ -606,6 +606,60 @@ async function loadPublicPosts() {
 
   postsList.innerHTML = '';
 
+const achievementPosts =
+  data.filter(post => post.post_type === 'prestasi');
+
+const achievementCount =
+  document.getElementById('achievementCount');
+
+const latestAchievementTitle =
+  document.getElementById('latestAchievementTitle');
+
+const latestAchievementDate =
+  document.getElementById('latestAchievementDate');
+
+if (achievementCount) {
+  achievementCount.textContent =
+    achievementPosts.length;
+}
+
+if (achievementPosts.length > 0) {
+
+  const latestAchievement =
+    achievementPosts[0];
+
+  if (latestAchievementTitle) {
+    latestAchievementTitle.textContent =
+      latestAchievement.title || '-';
+  }
+
+  if (latestAchievementDate) {
+
+    latestAchievementDate.textContent =
+      latestAchievement.created_at
+        ? new Date(
+            latestAchievement.created_at
+          ).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })
+        : '-';
+  }
+
+} else {
+
+  if (latestAchievementTitle) {
+    latestAchievementTitle.textContent =
+      'Belum ada';
+  }
+
+  if (latestAchievementDate) {
+    latestAchievementDate.textContent =
+      '-';
+  }
+}  
+
   data.forEach(post => {
     const tanggal = post.created_at
       ? new Date(post.created_at).toLocaleDateString('id-ID', {
