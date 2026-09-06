@@ -703,6 +703,66 @@ if (achievementPosts.length > 0) {
   });
 }
 
-loadPublicPosts();</script>
+async function loadFeaturedPlayers() {
+  const container = document.getElementById('featuredPlayers');
+
+  if (!container) return;
+
+  const { data, error } = await supabaseClient
+    .from('players')
+    .select('full_name, position, jersey_number, photo_url')
+    .eq('status', 'Aktif')
+    .order('created_at', { ascending: false })
+    .limit(4);
+
+  if (error) {
+    console.error('Gagal memuat pemain pilihan:', error);
+
+    container.innerHTML = `
+      <div class="player">
+        <div class="avatar">!</div>
+        <h3>Gagal memuat</h3>
+        <p>Data pemain tidak tersedia</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML = `
+      <div class="player">
+        <div class="avatar">-</div>
+        <h3>Belum ada pemain</h3>
+        <p>Pemain aktif belum tersedia</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML = data.map(player => {
+    const nomor = player.jersey_number ?? '-';
+    const nama = escapeHtml(player.full_name || '-');
+    const posisi = escapeHtml(player.position || 'Pemain');
+
+    const avatar = player.photo_url
+      ? `<img src="${escapeHtml(player.photo_url)}" alt="${nama}">`
+      : `<div class="avatar">${nomor}</div>`;
+
+    return `
+      <div class="player">
+        ${avatar}
+        <h3>${nama}</h3>
+        <p>${posisi}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+loadPublicPosts();
+loadFeaturedPlayers();
+
+</script>
 </body>
 </html>
