@@ -327,7 +327,8 @@ async function registerDemo(e) {
   try {
     const full_name = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
-   const program = form.querySelector('select[name="program"]').value.trim();
+  const jersey_number = document.getElementById('jerseyNumber').value;
+const position = document.getElementById('position').value;
 
 if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
   throw new Error('Kelompok umur wajib dipilih.');
@@ -377,12 +378,14 @@ if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
    const { data: player, error: playerError } = await supabaseClient
   .from('players')
   .insert([
-    {
-      full_name: full_name,
-      phone: phone,
-      program: program
-    }
-  ])
+  {
+    full_name: full_name,
+    phone: phone,
+    program: program,
+    jersey_number: jersey_number,
+    position: position
+  }
+])
   .select()
   .single();
 
