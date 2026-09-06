@@ -1977,6 +1977,85 @@ function escapeAttendanceHtml(value) {
 }
 </script>
 
+<script>
+async function openManagementAccounts() {
+  const email = prompt("Masukkan email akun Management:");
+
+  if (!email) {
+    return;
+  }
+
+  const password = prompt(
+    "Masukkan password akun Management (minimal 6 karakter):"
+  );
+
+  if (!password) {
+    return;
+  }
+
+  if (password.length < 6) {
+    alert("Password minimal 6 karakter.");
+    return;
+  }
+
+  if (!confirm(
+    "Buat akun Management dengan email:\n\n" +
+    email +
+    "\n\nLanjutkan?"
+  )) {
+    return;
+  }
+
+  try {
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+      alert("Sesi Admin sudah berakhir. Silakan login kembali.");
+      return;
+    }
+
+    const { data, error } = await supabaseClient.functions.invoke(
+      "create-management-user",
+      {
+        body: {
+          email: email,
+          password: password
+        }
+      }
+    );
+
+    if (error) {
+      console.error(error);
+      alert(
+        "Gagal membuat akun Management.\n\n" +
+        (error.message || "Terjadi kesalahan.")
+      );
+      return;
+    }
+
+    if (data?.success) {
+      alert(
+        "✅ Akun Management berhasil dibuat!\n\n" +
+        "Email: " + email
+      );
+    } else {
+      alert(
+        "Gagal membuat akun Management.\n\n" +
+        (data?.error || "Terjadi kesalahan.")
+      );
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert(
+      "Terjadi kesalahan saat membuat akun Management."
+    );
+  }
+}
+</script>
+  
 </body>
 </html>
 
