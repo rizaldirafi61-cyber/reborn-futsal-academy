@@ -747,9 +747,8 @@ async function loadFeaturedPlayers() {
 const posisi = player.position || 'Pemain';
 
     const avatar = player.photo_url
-     `<img src="${player.photo_url}" alt="${nama}">`
-      : `<div class="avatar">${nomor}</div>`;
-
+  ? `<img src="${player.photo_url}" alt="${nama}">`
+  : `<div class="avatar">${nomor}</div>`;
     return `
       <div class="player">
         ${avatar}
