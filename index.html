@@ -56,7 +56,7 @@
       <div class="player-leg right"></div>
     </div>
     <div class="quote-card">
-      <b>“</b>
+      <b>"</b>
       <p>Disiplin hari ini,<br>prestasi esok hari.</p>
       <small>— Reborn Futsal Academy</small>
     </div>
@@ -107,7 +107,7 @@
 
   <article class="program-card">
     <span class="number">03</span>
-    <div class="program-icon">💪</div>
+    <div class="program-icon"></div>
     <h3>U16</h3>
     <p>
       Pembinaan lebih intensif dengan fokus pada taktik,
@@ -141,12 +141,12 @@
       </div>
       <div class="schedule-item">
         <div class="date"><b>14</b><span>SEP</span></div>
-        <div><small>PROGRAM JUNIOR</small><h3>Taktik Tim</h3><p>📍 Lapangan Reborn &nbsp; • &nbsp; 🕘 19:00–21:00</p></div>
+        <div><small>PROGRAM JUNIOR</small><h3>Taktik Tim</h3><p> Lapangan Reborn &nbsp; • &nbsp;  19:00–21:00</p></div>
         <span class="pill">Terjadwal</span>
       </div>
       <div class="schedule-item">
         <div class="date"><b>16</b><span>SEP</span></div>
-        <div><small>KIDS ACADEMY</small><h3>Koordinasi &amp; Ball Mastery</h3><p>📍 Lapangan Reborn &nbsp; • &nbsp; 🕘 16:00–18:00</p></div>
+        <div><small>KIDS ACADEMY</small><h3>Koordinasi &amp; Ball Mastery</h3><p>📍 Lapangan Reborn &nbsp; • &nbsp;  16:00–18:00</p></div>
         <span class="pill">Terjadwal</span>
       </div>
     </div>
@@ -207,7 +207,7 @@
       <h2>Ingin jadi pemain hebat?<br><span>Mulai sekarang.</span></h2>
       <p>Isi data singkat untuk bergabung dengan Reborn Futsal Academy.</p>
     </div>
-    <form onsubmit="registerDemo(event)">
+    <form id="registrationForm" onsubmit="registerDemo(event)">
   <input id="fullName" required placeholder="Nama lengkap">
 
   <input id="phone" required type="tel" placeholder="Nomor WhatsApp">
@@ -276,6 +276,8 @@
     * KK dan Akta Kelahiran wajib diunggah untuk proses pendaftaran.
   </small>
 </form>
+
+    <div id="registrationStatus" style="display:none;margin-top:15px;padding:12px 15px;border-radius:10px;font-weight:600;"></div>
   </div>
 </section>
 
@@ -290,20 +292,30 @@
 </footer>
 
 <script>
+// GANTI DENGAN SUPABASE URL DAN KEY ANDA YANG BENAR
 const SUPABASE_URL = 'https://txgwdcxsmgclbgbxdbsf.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_g3Tsr8PRmwhGvFcGGJOuOg_0R6zCrr6';
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
+// Inisialisasi Supabase
+let supabaseClient;
+try {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+} catch (error) {
+  console.error('Gagal inisialisasi Supabase:', error);
+}
+
+function safeTrim(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value).trim();
+}
 
 async function registerDemo(e) {
   e.preventDefault();
 
   const form = e.target;
   const button = form.querySelector('button[type="submit"]');
-
   let status = document.getElementById('registrationStatus');
 
   if (!status) {
@@ -322,16 +334,33 @@ async function registerDemo(e) {
   status.textContent = '⏳ Sedang memproses pendaftaran...';
 
   button.disabled = true;
-  button.textContent = '⏳ Mengirim...';
+  button.textContent = ' Mengirim...';
 
   try {
-    const full_name = document.getElementById('fullName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const program = document.getElementById('program').value.trim();
-    const jersey_number = document.getElementById('jerseyNumber').value
-      ? Number(document.getElementById('jerseyNumber').value)
-      : null;
-    const position = document.getElementById('position').value.trim();
+    // Ambil nilai dengan safeTrim untuk menghindari error
+    const fullNameElement = document.getElementById('fullName');
+    const phoneElement = document.getElementById('phone');
+    const programElement = document.getElementById('program');
+    const jerseyNumberElement = document.getElementById('jerseyNumber');
+    const positionElement = document.getElementById('position');
+
+    if (!fullNameElement || !phoneElement || !programElement || !jerseyNumberElement || !positionElement) {
+      throw new Error('Form tidak lengkap. Silakan refresh halaman dan coba lagi.');
+    }
+
+    const full_name = safeTrim(fullNameElement.value);
+    const phone = safeTrim(phoneElement.value);
+    const program = safeTrim(programElement.value);
+    const jersey_number = jerseyNumberElement.value ? Number(jerseyNumberElement.value) : null;
+    const position = safeTrim(positionElement.value);
+
+    if (!full_name) {
+      throw new Error('Nama lengkap wajib diisi.');
+    }
+
+    if (!phone) {
+      throw new Error('Nomor WhatsApp wajib diisi.');
+    }
 
     if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
       throw new Error('Kelompok umur wajib dipilih.');
@@ -341,12 +370,19 @@ async function registerDemo(e) {
       throw new Error('Posisi wajib dipilih.');
     }
 
-    if (!jersey_number) {
-      throw new Error('Nomor jersey wajib diisi.');
+    if (!jersey_number || jersey_number < 1 || jersey_number > 99) {
+      throw new Error('Nomor jersey wajib diisi (1-99).');
     }
 
-    const kkFile = document.getElementById('kkFile').files[0];
-    const aktaFile = document.getElementById('aktaFile').files[0];
+    const kkFileInput = document.getElementById('kkFile');
+    const aktaFileInput = document.getElementById('aktaFile');
+
+    if (!kkFileInput || !aktaFileInput) {
+      throw new Error('Form upload dokumen tidak tersedia.');
+    }
+
+    const kkFile = kkFileInput.files[0];
+    const aktaFile = aktaFileInput.files[0];
 
     if (!kkFile) {
       throw new Error('File KK belum dipilih.');
@@ -359,6 +395,7 @@ async function registerDemo(e) {
     const allowedTypes = [
       'application/pdf',
       'image/jpeg',
+      'image/jpg',
       'image/png'
     ];
 
@@ -384,26 +421,27 @@ async function registerDemo(e) {
        1. SIMPAN DATA PEMAIN
        ========================================== */
 
-    status.textContent = '⏳ Menyimpan data pendaftar...';
+    status.textContent = ' Menyimpan data pendaftar...';
 
-   const { data: player, error: playerError } = await supabaseClient
-  .from('players')
-  .insert([
-  {
-    full_name: full_name,
-    phone: phone,
-    program: program,
-    jersey_number: jersey_number,
-    position: position
-  }
-])
-  .select()
-  .single();
+    const { data: player, error: playerError } = await supabaseClient
+      .from('players')
+      .insert([{
+        full_name: full_name,
+        phone: phone,
+        program: program,
+        jersey_number: jersey_number,
+        position: position
+      }])
+      .select()
+      .single();
 
     if (playerError) {
-      throw new Error(
-        'Gagal menyimpan data pemain: ' + playerError.message
-      );
+      console.error('Player error:', playerError);
+      throw new Error('Gagal menyimpan data pemain: ' + playerError.message);
+    }
+
+    if (!player || !player.id) {
+      throw new Error('Data pemain berhasil dibuat tetapi ID tidak ditemukan.');
     }
 
     const playerId = player.id;
@@ -414,17 +452,19 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Mengunggah dokumen KK...';
 
-    const kkPath =
-      `${playerId}/kk-${crypto.randomUUID()}.${getFileExtension(kkFile.name)}`;
+    const kkExtension = getFileExtension(kkFile.name);
+    const kkPath = `${playerId}/kk-${Date.now()}-${Math.random().toString(36).substring(7)}.${kkExtension}`;
 
     const { error: kkUploadError } = await supabaseClient.storage
       .from('player-documents')
-      .upload(kkPath, kkFile);
+      .upload(kkPath, kkFile, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (kkUploadError) {
-      throw new Error(
-        'Upload KK gagal: ' + kkUploadError.message
-      );
+      console.error('KK upload error:', kkUploadError);
+      throw new Error('Upload KK gagal: ' + kkUploadError.message);
     }
 
     /* ==========================================
@@ -433,17 +473,19 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Mengunggah Akta Kelahiran...';
 
-    const aktaPath =
-      `${playerId}/akta-kelahiran-${crypto.randomUUID()}.${getFileExtension(aktaFile.name)}`;
+    const aktaExtension = getFileExtension(aktaFile.name);
+    const aktaPath = `${playerId}/akta-kelahiran-${Date.now()}-${Math.random().toString(36).substring(7)}.${aktaExtension}`;
 
     const { error: aktaUploadError } = await supabaseClient.storage
       .from('player-documents')
-      .upload(aktaPath, aktaFile);
+      .upload(aktaPath, aktaFile, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (aktaUploadError) {
-      throw new Error(
-        'Upload Akta Kelahiran gagal: ' + aktaUploadError.message
-      );
+      console.error('Akta upload error:', aktaUploadError);
+      throw new Error('Upload Akta Kelahiran gagal: ' + aktaUploadError.message);
     }
 
     /* ==========================================
@@ -474,9 +516,8 @@ async function registerDemo(e) {
       ]);
 
     if (documentError) {
-      throw new Error(
-        'Data dokumen gagal disimpan: ' + documentError.message
-      );
+      console.error('Document error:', documentError);
+      throw new Error('Data dokumen gagal disimpan: ' + documentError.message);
     }
 
     /* ==========================================
@@ -485,123 +526,127 @@ async function registerDemo(e) {
 
     status.style.background = '#ecfdf5';
     status.style.color = '#166534';
-
-    status.textContent =
-      '✅ Pendaftaran berhasil! Data dan dokumen sudah tersimpan.';
+    status.textContent = '✅ Pendaftaran berhasil! Data dan dokumen sudah tersimpan.';
 
     form.reset();
 
     button.disabled = false;
     button.textContent = 'Kirim Pendaftaran →';
 
-  } catch (error) {
+    // Scroll ke status
+    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
+  } catch (error) {
     console.error('Pendaftaran error:', error);
 
     status.style.background = '#fef2f2';
     status.style.color = '#b91c1c';
-
-    status.textContent =
-      '❌ Pendaftaran gagal: ' + error.message;
+    status.textContent = '❌ Pendaftaran gagal: ' + error.message;
 
     button.disabled = false;
     button.textContent = 'Kirim Pendaftaran →';
+
+    // Scroll ke status
+    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
 
-
 function getFileExtension(fileName) {
+  if (!fileName) return 'file';
   const parts = fileName.split('.');
-
-  return parts.length > 1
-    ? parts.pop().toLowerCase()
-    : 'file';
+  return parts.length > 1 ? parts.pop().toLowerCase() : 'file';
 }
 </script>
+
 <script>
 async function loadPublicSchedules() {
-
   const scheduleList = document.getElementById('publicScheduleList');
 
   if (!scheduleList) {
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from('training_schedules')
-    .select('*')
-    .order('training_date', { ascending: true })
-    .order('start_time', { ascending: true });
+  try {
+    const { data, error } = await supabaseClient
+      .from('training_schedules')
+      .select('*')
+      .order('training_date', { ascending: true })
+      .order('start_time', { ascending: true });
 
-  if (error) {
-    console.error('Gagal memuat jadwal:', error);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    scheduleList.innerHTML = `
-      <div class="schedule-item">
-        <div>
-          <h3>Belum ada jadwal latihan</h3>
-          <p>Jadwal latihan akan segera diperbarui.</p>
+    if (error) {
+      console.error('Gagal memuat jadwal:', error);
+      scheduleList.innerHTML = `
+        <div class="schedule-item">
+          <div>
+            <h3>Belum ada jadwal latihan</h3>
+            <p>Jadwal latihan akan segera diperbarui.</p>
+          </div>
         </div>
-      </div>
-    `;
-    return;
-  }
+      `;
+      return;
+    }
 
-  scheduleList.innerHTML = '';
+    if (!data || data.length === 0) {
+      scheduleList.innerHTML = `
+        <div class="schedule-item">
+          <div>
+            <h3>Belum ada jadwal latihan</h3>
+            <p>Jadwal latihan akan segera diperbarui.</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
 
-  data.forEach(schedule => {
+    scheduleList.innerHTML = '';
 
-    const date = schedule.training_date
-      ? new Date(schedule.training_date + 'T00:00:00')
-          .toLocaleDateString('id-ID', {
+    data.forEach(schedule => {
+      const date = schedule.training_date
+        ? new Date(schedule.training_date + 'T00:00:00').toLocaleDateString('id-ID', {
             weekday: 'long',
             day: 'numeric',
             month: 'long'
           })
-      : '-';
+        : '-';
 
-    const start = schedule.start_time
-      ? schedule.start_time.substring(0, 5)
-      : '-';
+      const start = schedule.start_time ? schedule.start_time.substring(0, 5) : '-';
+      const end = schedule.end_time ? schedule.end_time.substring(0, 5) : '-';
 
-    const end = schedule.end_time
-      ? schedule.end_time.substring(0, 5)
-      : '-';
+      const item = document.createElement('div');
+      item.className = 'schedule-item';
 
-    const item = document.createElement('div');
-    item.className = 'schedule-item';
+      item.innerHTML = `
+        <div class="date">
+          <b>${date}</b>
+        </div>
+        <div>
+          <small>PROGRAM ${schedule.program || ''}</small>
+          <h3>Latihan ${schedule.program || ''}</h3>
+          <p>
+            📍 ${schedule.location || 'Lokasi belum ditentukan'}
+            &nbsp; • &nbsp;
+            🕐 ${start}–${end}
+          </p>
+          ${schedule.notes ? `<p>${schedule.notes}</p>` : ''}
+        </div>
+        <span class="pill">Terjadwal</span>
+      `;
 
-    item.innerHTML = `
-      <div class="date">
-        <b>${date}</b>
+      scheduleList.appendChild(item);
+    });
+  } catch (error) {
+    console.error('Error loading schedules:', error);
+    scheduleList.innerHTML = `
+      <div class="schedule-item">
+        <div>
+          <h3>Gagal memuat jadwal</h3>
+          <p>Silakan coba beberapa saat lagi.</p>
+        </div>
       </div>
-
-      <div>
-        <small>PROGRAM ${schedule.program || ''}</small>
-        <h3>Latihan ${schedule.program || ''}</h3>
-        <p>
-          📍 ${schedule.location || 'Lokasi belum ditentukan'}
-          &nbsp; • &nbsp;
-          🕐 ${start}–${end}
-        </p>
-        ${
-          schedule.notes
-            ? `<p>${schedule.notes}</p>`
-            : ''
-        }
-      </div>
-
-      <span class="pill">Terjadwal</span>
     `;
-
-    scheduleList.appendChild(item);
-  });
+  }
 }
 
-loadPublicSchedules();
 async function loadPublicPosts() {
   const postsList = document.getElementById('publicPostsList');
 
@@ -609,147 +654,164 @@ async function loadPublicPosts() {
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from('academy_posts')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabaseClient
+      .from('academy_posts')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Gagal memuat berita:', error);
+    if (error) {
+      console.error('Gagal memuat berita:', error);
+      postsList.innerHTML = `
+        <article class="card value-card">
+          <div class="icon">⚠️</div>
+          <h3>Berita belum dapat dimuat</h3>
+          <p>Silakan coba beberapa saat lagi.</p>
+        </article>
+      `;
+      return;
+    }
 
+    if (!data || data.length === 0) {
+      postsList.innerHTML = `
+        <article class="card value-card">
+          <div class="icon"></div>
+          <h3>Belum ada berita</h3>
+          <p>Berita dan prestasi terbaru akan ditampilkan di sini.</p>
+        </article>
+      `;
+      return;
+    }
+
+    const achievementPosts = data.filter(post => post.post_type === 'prestasi');
+    const achievementCount = document.getElementById('achievementCount');
+    const latestAchievementTitle = document.getElementById('latestAchievementTitle');
+    const latestAchievementDate = document.getElementById('latestAchievementDate');
+
+    if (achievementCount) {
+      achievementCount.textContent = achievementPosts.length;
+    }
+
+    if (achievementPosts.length > 0) {
+      const latestAchievement = achievementPosts[0];
+      if (latestAchievementTitle) {
+        latestAchievementTitle.textContent = latestAchievement.title || '-';
+      }
+      if (latestAchievementDate) {
+        latestAchievementDate.textContent = latestAchievement.created_at
+          ? new Date(latestAchievement.created_at).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })
+          : '-';
+      }
+    } else {
+      if (latestAchievementTitle) {
+        latestAchievementTitle.textContent = 'Belum ada';
+      }
+      if (latestAchievementDate) {
+        latestAchievementDate.textContent = '-';
+      }
+    }
+
+    postsList.innerHTML = '';
+
+    data.forEach(post => {
+      const tanggal = post.created_at
+        ? new Date(post.created_at).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          })
+        : '';
+
+      const jenis = post.post_type === 'prestasi' ? 'PRESTASI' : 'BERITA';
+
+      const article = document.createElement('article');
+      article.className = 'card value-card';
+
+      article.innerHTML = `
+        <div class="icon">
+          ${post.post_type === 'prestasi' ? '🏆' : '📰'}
+        </div>
+        ${post.image_url ? `<img src="${post.image_url}" alt="${post.title || 'Berita Reborn'}" style="width:100%;border-radius:12px;margin-bottom:15px;">` : ''}
+        <small style="font-weight:700;color:#0a8f3d;">
+          ${jenis}
+        </small>
+        <h3>${post.title || '-'}</h3>
+        <p>${post.content || ''}</p>
+        <small>${tanggal}</small>
+      `;
+
+      postsList.appendChild(article);
+    });
+  } catch (error) {
+    console.error('Error loading posts:', error);
     postsList.innerHTML = `
       <article class="card value-card">
         <div class="icon">⚠️</div>
-        <h3>Berita belum dapat dimuat</h3>
+        <h3>Gagal memuat berita</h3>
         <p>Silakan coba beberapa saat lagi.</p>
       </article>
     `;
-
-    return;
   }
-
-  if (!data || data.length === 0) {
-    postsList.innerHTML = `
-      <article class="card value-card">
-        <div class="icon">📰</div>
-        <h3>Belum ada berita</h3>
-        <p>Berita dan prestasi terbaru akan ditampilkan di sini.</p>
-      </article>
-    `;
-
-    return;
-  }
-
-  postsList.innerHTML = '';
-
-const achievementPosts =
-  data.filter(post => post.post_type === 'prestasi');
-
-const achievementCount =
-  document.getElementById('achievementCount');
-
-const latestAchievementTitle =
-  document.getElementById('latestAchievementTitle');
-
-const latestAchievementDate =
-  document.getElementById('latestAchievementDate');
-
-if (achievementCount) {
-  achievementCount.textContent =
-    achievementPosts.length;
-}
-
-if (achievementPosts.length > 0) {
-
-  const latestAchievement =
-    achievementPosts[0];
-
-  if (latestAchievementTitle) {
-    latestAchievementTitle.textContent =
-      latestAchievement.title || '-';
-  }
-
-  if (latestAchievementDate) {
-
-    latestAchievementDate.textContent =
-      latestAchievement.created_at
-        ? new Date(
-            latestAchievement.created_at
-          ).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          })
-        : '-';
-  }
-
-} else {
-
-  if (latestAchievementTitle) {
-    latestAchievementTitle.textContent =
-      'Belum ada';
-  }
-
-  if (latestAchievementDate) {
-    latestAchievementDate.textContent =
-      '-';
-  }
-}  
-
-  data.forEach(post => {
-    const tanggal = post.created_at
-      ? new Date(post.created_at).toLocaleDateString('id-ID', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        })
-      : '';
-
-    const jenis = post.post_type === 'prestasi'
-      ? 'PRESTASI'
-      : 'BERITA';
-
-    const article = document.createElement('article');
-    article.className = 'card value-card';
-
-    article.innerHTML = `
-      <div class="icon">
-        ${post.post_type === 'prestasi' ? '🏆' : '📰'}
-      </div>
-
-      ${
-        post.image_url
-          ? `<img src="${post.image_url}" alt="${post.title || 'Berita Reborn'}" style="width:100%;border-radius:12px;margin-bottom:15px;">`
-          : ''
-      }
-
-      <small style="font-weight:700;color:#0a8f3d;">
-        ${jenis}
-      </small>
-
-      <h3>${post.title || '-'}</h3>
-
-      <p>${post.content || ''}</p>
-
-      <small>${tanggal}</small>
-    `;
-
-    postsList.appendChild(article);
-  });
 }
 
 async function loadFeaturedPlayers() {
   const container = document.getElementById('featuredPlayers');
 
-  if (!container) return;
+  if (!container) {
+    return;
+  }
 
- const { data, error } = await supabaseClient
-  .from('featured_players')
-  .select('full_name, position, jersey_number, photo_url');
+  try {
+    const { data, error } = await supabaseClient
+      .from('featured_players')
+      .select('full_name, position, jersey_number, photo_url');
 
-  if (error) {
-    console.error('Gagal memuat pemain pilihan:', error);
+    if (error) {
+      console.error('Gagal memuat pemain pilihan:', error);
+      container.innerHTML = `
+        <div class="player">
+          <div class="avatar">!</div>
+          <h3>Gagal memuat</h3>
+          <p>Data pemain tidak tersedia</p>
+        </div>
+      `;
+      return;
+    }
 
+    if (!data || data.length === 0) {
+      container.innerHTML = `
+        <div class="player">
+          <div class="avatar">-</div>
+          <h3>Belum ada pemain</h3>
+          <p>Pemain aktif belum tersedia</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = data.map(player => {
+      const nomor = player.jersey_number ?? '-';
+      const nama = player.full_name || '-';
+      const posisi = player.position || 'Pemain';
+
+      const avatar = player.photo_url
+        ? `<img src="${player.photo_url}" alt="${nama}" style="width:100%;height:200px;object-fit:cover;border-radius:12px;">`
+        : `<div class="avatar">${nomor}</div>`;
+
+      return `
+        <div class="player">
+          ${avatar}
+          <h3>${nama}</h3>
+          <p>${posisi}</p>
+        </div>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Error loading players:', error);
     container.innerHTML = `
       <div class="player">
         <div class="avatar">!</div>
@@ -757,43 +819,15 @@ async function loadFeaturedPlayers() {
         <p>Data pemain tidak tersedia</p>
       </div>
     `;
-
-    return;
   }
-
-  if (!data || data.length === 0) {
-    container.innerHTML = `
-      <div class="player">
-        <div class="avatar">-</div>
-        <h3>Belum ada pemain</h3>
-        <p>Pemain aktif belum tersedia</p>
-      </div>
-    `;
-
-    return;
-  }
-
-  container.innerHTML = data.map(player => {
-    const nomor = player.jersey_number ?? '-';
-   const nama = player.full_name || '-';
-const posisi = player.position || 'Pemain';
-
-    const avatar = player.photo_url
-  ? `<img src="${player.photo_url}" alt="${nama}">`
-  : `<div class="avatar">${nomor}</div>`;
-    return `
-      <div class="player">
-        ${avatar}
-        <h3>${nama}</h3>
-        <p>${posisi}</p>
-      </div>
-    `;
-  }).join('');
 }
 
-loadPublicPosts();
-loadFeaturedPlayers();
-
+// Load semua data saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+  loadPublicSchedules();
+  loadPublicPosts();
+  loadFeaturedPlayers();
+});
 </script>
 </body>
 </html>
