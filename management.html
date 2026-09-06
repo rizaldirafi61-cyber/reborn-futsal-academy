@@ -363,7 +363,40 @@
   <div class="info-card-description">
     Rekap kehadiran pemain pada seluruh jadwal latihan.
   </div>
+<div style="
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:15px 0;
+">
+  <input
+    type="text"
+    id="attendanceSearch"
+    placeholder="🔎 Cari nama pemain..."
+    style="
+      flex:1;
+      min-width:220px;
+      padding:10px 12px;
+      border:1px solid #ddd;
+      border-radius:10px;
+    "
+  >
 
+  <select
+    id="attendanceProgramFilter"
+    style="
+      padding:10px 12px;
+      border:1px solid #ddd;
+      border-radius:10px;
+    "
+  >
+    <option value="">Semua Program</option>
+    <option value="U14">U14</option>
+    <option value="U15">U15</option>
+    <option value="U16">U16</option>
+    <option value="U17">U17</option>
+  </select>
+</div>
   <div class="table-wrapper">
     <table>
       <thead>
