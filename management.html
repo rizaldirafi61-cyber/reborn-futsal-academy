@@ -803,7 +803,15 @@ if (endDate && trainingDate > endDate) return;
 
   const searchInput = document.getElementById('attendanceSearch');
 const programFilter = document.getElementById('attendanceProgramFilter');
+document
+  .getElementById('attendanceStartDate')
+  ?.addEventListener('change', loadAttendanceSummary);
 
+document
+  .getElementById('attendanceEndDate')
+  ?.addEventListener('change', loadAttendanceSummary);
+
+    
 function renderAttendanceSummary() {
   const searchText = (searchInput?.value || '').toLowerCase().trim();
   const selectedProgram = programFilter?.value || '';
