@@ -324,6 +324,8 @@
  <th>Nama</th>
 <th>WhatsApp</th>
 <th>Program</th>
+<th>Posisi</th>
+<th>No. Jersey</th>
 <th>Tanggal Daftar</th>
 <th>Status</th>
 <th>Dokumen</th>
@@ -870,7 +872,7 @@ document.getElementById('totalU17').textContent =
   data.filter(player => player.program === 'U17').length;
   if (data.length === 0) {
     table.innerHTML =
-      '<tr><td colspan="6">Belum ada data pendaftar.</td></tr>';
+      '<tr><td colspan="9">Belum ada data pendaftar.</td></tr>';
     return;
   }
 
@@ -930,6 +932,10 @@ document.getElementById('totalU17').textContent =
       <td>${escapeHtml(player.phone || '-')}</td>
 
       <td>${escapeHtml(player.program || '-')}</td>
+
+      <td>${escapeHtml(player.position || '-')}</td>
+
+      <td>${player.jersey_number ?? '-'}</td>
 
       <td>${date}</td>
 <td>
@@ -2058,4 +2064,3 @@ async function openManagementAccounts() {
   
 </body>
 </html>
-
