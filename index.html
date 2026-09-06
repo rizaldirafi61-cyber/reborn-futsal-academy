@@ -309,7 +309,11 @@ async function registerDemo(e) {
   try {
     const full_name = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const program = document.getElementById('program').value;
+   const program = document.getElementById('program').value.trim();
+
+if (!['U14', 'U15', 'U16', 'U17'].includes(program)) {
+  throw new Error('Kelompok umur wajib dipilih.');
+}
 
     const kkFile = document.getElementById('kkFile').files[0];
     const aktaFile = document.getElementById('aktaFile').files[0];
@@ -352,17 +356,17 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Menyimpan data pendaftar...';
 
-    const { data: player, error: playerError } = await supabaseClient
-      .from('players')
-      .insert([
-        {
-          full_name: full_name,
-          phone: phone,
-          program: program
-        }
-      ])
-      .select('id')
-      .single();
+   const { data: player, error: playerError } = await supabaseClient
+  .from('players')
+  .insert([
+    {
+      full_name: full_name,
+      phone: phone,
+      program: program
+    }
+  ])
+  .select()
+  .single();
 
     if (playerError) {
       throw new Error(
