@@ -592,7 +592,7 @@ async function loadPlayers() {
   } = await supabaseClient
     .from('players')
     .select(
-      'id, full_name, phone, program, join_date, status'
+      'id, full_name, phone, program, join_date, status, birth_date, position, jersey_number, notes'
     )
     .order(
       'created_at',
@@ -791,22 +791,10 @@ function renderPlayers(players) {
             <strong>WhatsApp</strong>
             <span>${escapeHtml(player.phone || '-')}</span>
           </div>
-
-          <div>
-            <strong>Email</strong>
-            <span>${escapeHtml(player.email || '-')}</span>
-          </div>
-
           <div>
             <strong>Tanggal Lahir</strong>
             <span>${tanggalLahir}</span>
           </div>
-
-          <div>
-            <strong>Jenis Kelamin</strong>
-            <span>${escapeHtml(player.gender || '-')}</span>
-          </div>
-
           <div>
             <strong>Posisi</strong>
             <span>${escapeHtml(player.position || '-')}</span>
