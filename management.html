@@ -744,10 +744,16 @@ async function logout() {
     return;
   }
 
-  const { data: attendance, error: attendanceError } = await supabaseClient
-    .from('training_attendance')
-    .select('player_id, attendance_status');
-
+ const { data: attendance, error: attendanceError } = await supabaseClient
+  .from('training_attendance')
+  .select(`
+    player_id,
+    attendance_status,
+    schedule_id,
+    training_schedules (
+      training_date
+    )
+  `);
   if (attendanceError) {
     console.error('Gagal mengambil absensi:', attendanceError);
 
