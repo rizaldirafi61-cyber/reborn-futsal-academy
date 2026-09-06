@@ -767,7 +767,11 @@ async function logout() {
 
     return;
   }
+const startDate =
+  document.getElementById('attendanceStartDate')?.value || '';
 
+const endDate =
+  document.getElementById('attendanceEndDate')?.value || '';
   const summary = {};
 
   (players || []).forEach(player => {
