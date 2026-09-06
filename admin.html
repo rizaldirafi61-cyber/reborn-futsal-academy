@@ -841,7 +841,7 @@ async function loadPlayers() {
 
   const { data, error } = await supabaseClient
     .from('players')
-   .select('id, full_name, phone, program, status, position, jersey_number, birth_date, notes, join_date, created_at')
+   .select('id, full_name, phone, program, registration_status, status, position, jersey_number, birth_date, notes, join_date, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -869,7 +869,7 @@ async function loadPlayers() {
     data.length;
 
  document.getElementById('newPlayers').textContent =
-  data.filter(player => (player.status || 'Menunggu') === 'Menunggu').length;
+  data.filter(player => (player.registration_status || 'Menunggu') === 'Menunggu').length;
 document.getElementById('totalU14').textContent =
   data.filter(player => player.program === 'U14').length;
 
@@ -909,7 +909,7 @@ document.getElementById('totalU17').textContent =
 
     let documentHtml = '';
 
-    if (kkDocument) {
+    if (kkDocument && kkDocument.storage_path) {
       documentHtml += `
         <button
           class="btn small"
@@ -923,7 +923,7 @@ document.getElementById('totalU17').textContent =
       `;
     }
 
-    if (aktaDocument) {
+    if (aktaDocument && aktaDocument.storage_path) {
       documentHtml += `
         <button
           class="btn small"
@@ -954,19 +954,19 @@ document.getElementById('totalU17').textContent =
     onchange="updateRegistrationStatus('${player.id}', this.value)"
     style="padding:6px 8px; border-radius:8px; border:1px solid #ddd;"
   >
-    <option value="Menunggu" ${(player.status || 'Menunggu') === 'Menunggu' ? 'selected' : ''}>
+    <option value="Menunggu" ${(player.registration_status || 'Menunggu') === 'Menunggu' ? 'selected' : ''}>
       Menunggu
     </option>
 
-    <option value="Diverifikasi" ${(player.status || 'Menunggu') === 'Diverifikasi' ? 'selected' : ''}>
+    <option value="Diverifikasi" ${(player.registration_status || 'Menunggu') === 'Diverifikasi' ? 'selected' : ''}>
       Diverifikasi
     </option>
 
-    <option value="Diterima" ${(player.status || 'Menunggu') === 'Diterima' ? 'selected' : ''}>
+    <option value="Diterima" ${(player.registration_status || 'Menunggu') === 'Diterima' ? 'selected' : ''}>
       Diterima
     </option>
 
-    <option value="Ditolak" ${(player.status || 'Menunggu') === 'Ditolak' ? 'selected' : ''}>
+    <option value="Ditolak" ${(player.registration_status || 'Menunggu') === 'Ditolak' ? 'selected' : ''}>
       Ditolak
     </option>
   </select>
@@ -1057,7 +1057,7 @@ document.getElementById('totalU17').textContent =
 async function viewAdminPlayerDetail(playerId) {
   const { data: player, error } = await supabaseClient
     .from('players')
-    .select('id, full_name, phone, birth_date, position, jersey_number, program, join_date, status, notes')
+    .select('id, full_name, phone, birth_date, position, jersey_number, program, join_date, registration_status, status, notes')
     .eq('id', playerId)
     .single();
   if (error) { alert('Gagal mengambil detail pemain: ' + error.message); return; }
@@ -1079,7 +1079,7 @@ async function viewAdminPlayerDetail(playerId) {
       <div class="admin-player-detail-item"><strong>Nomor Punggung</strong><span>${escapeHtml(player.jersey_number??'-')}</span></div>
       <div class="admin-player-detail-item"><strong>Program</strong><span>${escapeHtml(player.program||'-')}</span></div>
       <div class="admin-player-detail-item"><strong>Tanggal Daftar</strong><span>${tanggalDaftar}</span></div>
-      <div class="admin-player-detail-item"><strong>Status</strong><span>${escapeHtml(player.status||'Menunggu')}</span></div>
+      <div class="admin-player-detail-item"><strong>Status Pendaftaran</strong><span>${escapeHtml(player.registration_status||'Menunggu')}</span></div>
       <div class="admin-player-detail-item admin-player-detail-full"><strong>Catatan</strong><span>${escapeHtml(player.notes||'-')}</span></div>
     </div></div>`;
   document.body.appendChild(overlay);
@@ -1091,7 +1091,7 @@ async function updateRegistrationStatus(playerId, status) {
   const { error } = await supabaseClient
     .from('players')
     .update({
-      status: status
+      registration_status: status
     })
     .eq('id', playerId);
 
@@ -1105,6 +1105,7 @@ async function updateRegistrationStatus(playerId, status) {
   }
 
   console.log('Status pendaftaran berhasil diubah:', status);
+   await loadPlayers();
 }function escapeHtml(value) {
 
   const div = document.createElement('div');
