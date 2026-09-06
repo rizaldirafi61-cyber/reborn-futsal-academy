@@ -196,7 +196,6 @@
       <p>Isi data singkat untuk bergabung dengan Reborn Futsal Academy.</p>
     </div>
     
-    <!-- FORM YANG SUDAH DIPERBAIKI DENGAN LABEL JELAS -->
     <form id="registrationForm" onsubmit="registerDemo(event)">
       
       <label for="fullName" style="font-weight:700; display:block; margin-bottom:5px;">Nama Lengkap <span style="color:red;">*</span></label>
@@ -205,8 +204,8 @@
       <label for="phone" style="font-weight:700; display:block; margin-bottom:5px;">Nomor WhatsApp <span style="color:red;">*</span></label>
       <input id="phone" name="phone" required type="tel" placeholder="Contoh: 083893319340" style="width:100%; margin-bottom:15px;">
 
-      <label for="program" style="font-weight:700; display:block; margin-bottom:5px;">Kelompok Umur <span style="color:red;">*</span></label>
-      <select id="program" name="program" required style="width:100%; margin-bottom:15px;">
+      <label for="ageGroup" style="font-weight:700; display:block; margin-bottom:5px;">Kelompok Umur <span style="color:red;">*</span></label>
+      <select id="ageGroup" name="age_group" required style="width:100%; margin-bottom:15px;">
         <option value="">-- Pilih Kelompok Umur --</option>
         <option value="U14">U14 (Usia 14 Tahun)</option>
         <option value="U15">U15 (Usia 15 Tahun)</option>
@@ -302,32 +301,32 @@ async function registerDemo(e) {
   button.textContent = '⏳ Mengirim...';
 
   try {
+    // Ambil nilai dari form
     const fullNameElement = document.getElementById('fullName');
     const phoneElement = document.getElementById('phone');
-    const programElement = document.getElementById('program');
+    const ageGroupElement = document.getElementById('ageGroup');  ← SUDAH GANTI NAMA
     const jerseyNumberElement = document.getElementById('jerseyNumber');
     const positionElement = document.getElementById('position');
 
-    if (!fullNameElement || !phoneElement || !programElement || !jerseyNumberElement || !positionElement) {
-      throw new Error('Form tidak lengkap. Silakan refresh halaman dan coba lagi.');
-    }
-
-    const full_name = safeTrim(fullNameElement.value);
-    const phone = safeTrim(phoneElement.value);
-    const program = safeTrim(programElement.value); 
+    // Baca nilainya
+    const full_name = fullNameElement.value.trim();
+    const phone = phoneElement.value.trim();
+    const age_group = ageGroupElement.value.trim();  ← INI YANG PENTING
     const jersey_number = jerseyNumberElement.value ? Number(jerseyNumberElement.value) : null;
-    const position = safeTrim(positionElement.value);
+    const position = positionElement.value.trim();
 
-    // Debug log
-    console.log('Form values:', { full_name, phone, program, jersey_number, position });
+    // Tampilkan di console untuk debug
+    console.log('Data yang dikirim:', { full_name, phone, age_group, jersey_number, position });
 
+    // Cek apakah semua sudah diisi
     if (!full_name) throw new Error('Nama lengkap wajib diisi.');
     if (!phone) throw new Error('Nomor WhatsApp wajib diisi.');
-    if (!program) throw new Error('Kelompok umur wajib dipilih.');
-    if (!['U14', 'U15', 'U16', 'U17'].includes(program)) throw new Error('Kelompok umur tidak valid.');
+    if (!age_group || age_group === '') throw new Error('Kelompok umur wajib dipilih.');
+    if (!['U14', 'U15', 'U16', 'U17'].includes(age_group)) throw new Error('Kelompok umur tidak valid.');
     if (!position) throw new Error('Posisi wajib dipilih.');
     if (!jersey_number || jersey_number < 1 || jersey_number > 99) throw new Error('Nomor jersey wajib diisi (1-99).');
 
+    // Cek file
     const kkFileInput = document.getElementById('kkFile');
     const aktaFileInput = document.getElementById('aktaFile');
 
@@ -349,13 +348,13 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Menyimpan data pendaftar...';
 
-    // INSERT ke Supabase
+    // Kirim ke Supabase
     const { data: player, error: playerError } = await supabaseClient
       .from('players')
       .insert([{ 
         full_name, 
         phone, 
-        program,  // Nilai: "U14", "U15", dll (tanpa toUpperCase)
+        age_group,  ← GANTI DARI program KE age_group
         jersey_number, 
         position 
       }])
@@ -393,7 +392,7 @@ async function registerDemo(e) {
 
     if (aktaUploadError) {
       console.error('Akta upload error:', aktaUploadError);
-      throw new Error('Upload Akta Kelahiran gagal: ' + kkUploadError.message);
+      throw new Error('Upload Akta Kelahiran gagal: ' + aktaUploadError.message);
     }
 
     status.textContent = '⏳ Menyimpan informasi dokumen...';
@@ -424,7 +423,7 @@ async function registerDemo(e) {
     status.textContent = '❌ Pendaftaran gagal: ' + error.message;
     button.disabled = false;
     button.textContent = 'Kirim Pendaftaran →';
-    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    status.scrollIntoView({ behavior: 'smooth', block: 'center');
   }
 }
 
