@@ -314,17 +314,16 @@ async function registerDemo(e) {
 
     const full_name = safeTrim(fullNameElement.value);
     const phone = safeTrim(phoneElement.value);
-    const program = safeTrim(programElement.value).toUpperCase();
+    const program = safeTrim(programElement.value); 
     const jersey_number = jerseyNumberElement.value ? Number(jerseyNumberElement.value) : null;
     const position = safeTrim(positionElement.value);
 
-    // Debug log: tampilkan nilai yang dibaca saat submit (hapus setelah selesai debugging)
-    console.debug('DEBUG - form values:', { full_name, phone, program, jersey_number, position });
+    // Debug log
+    console.log('Form values:', { full_name, phone, program, jersey_number, position });
 
     if (!full_name) throw new Error('Nama lengkap wajib diisi.');
     if (!phone) throw new Error('Nomor WhatsApp wajib diisi.');
     if (!program) throw new Error('Kelompok umur wajib dipilih.');
-    // Kalau Anda ingin validasi ketat terhadap daftar yang diterima, aktifkan baris berikut:
     if (!['U14', 'U15', 'U16', 'U17'].includes(program)) throw new Error('Kelompok umur tidak valid.');
     if (!position) throw new Error('Posisi wajib dipilih.');
     if (!jersey_number || jersey_number < 1 || jersey_number > 99) throw new Error('Nomor jersey wajib diisi (1-99).');
@@ -350,9 +349,16 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Menyimpan data pendaftar...';
 
+    // INSERT ke Supabase
     const { data: player, error: playerError } = await supabaseClient
       .from('players')
-      .insert([{ full_name, phone, program, jersey_number, position }])
+      .insert([{ 
+        full_name, 
+        phone, 
+        program,  // Nilai: "U14", "U15", dll (tanpa toUpperCase)
+        jersey_number, 
+        position 
+      }])
       .select()
       .single();
 
@@ -387,7 +393,7 @@ async function registerDemo(e) {
 
     if (aktaUploadError) {
       console.error('Akta upload error:', aktaUploadError);
-      throw new Error('Upload Akta Kelahiran gagal: ' + aktaUploadError.message);
+      throw new Error('Upload Akta Kelahiran gagal: ' + kkUploadError.message);
     }
 
     status.textContent = '⏳ Menyimpan informasi dokumen...';
