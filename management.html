@@ -638,6 +638,136 @@ function renderPlayers(players) {
 
 }
 
+  async function viewPlayerDetail(playerId) {
+
+  const { data: player, error } = await supabaseClient
+    .from('players')
+    .select('*')
+    .eq('id', playerId)
+    .single();
+
+  if (error) {
+    console.error('Gagal mengambil detail pemain:', error);
+    alert('Gagal memuat detail pemain.');
+    return;
+  }
+
+  const tanggalDaftar = player.join_date
+    ? new Date(player.join_date).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      })
+    : '-';
+
+  const tanggalLahir = player.birth_date
+    ? new Date(player.birth_date).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      })
+    : '-';
+
+  const modal = document.createElement('div');
+
+  modal.id = 'playerDetailModal';
+
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="closePlayerDetail(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>👤 Detail Pemain</h2>
+
+          <button
+            class="modal-close"
+            onclick="closePlayerDetail()">
+            ✕
+          </button>
+        </div>
+
+        <div class="player-detail-grid">
+
+          <div>
+            <strong>Nama Lengkap</strong>
+            <span>${escapeHtml(player.full_name || '-')}</span>
+          </div>
+
+          <div>
+            <strong>WhatsApp</strong>
+            <span>${escapeHtml(player.phone || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Email</strong>
+            <span>${escapeHtml(player.email || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Tanggal Lahir</strong>
+            <span>${tanggalLahir}</span>
+          </div>
+
+          <div>
+            <strong>Jenis Kelamin</strong>
+            <span>${escapeHtml(player.gender || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Posisi</strong>
+            <span>${escapeHtml(player.position || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Nomor Punggung</strong>
+            <span>${escapeHtml(
+              player.jersey_number ?? '-'
+            )}</span>
+          </div>
+
+          <div>
+            <strong>Program</strong>
+            <span>${escapeHtml(player.program || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Tanggal Daftar</strong>
+            <span>${tanggalDaftar}</span>
+          </div>
+
+          <div>
+            <strong>Status</strong>
+            <span>${escapeHtml(player.status || 'Menunggu')}</span>
+          </div>
+
+          <div class="full-width">
+            <strong>Catatan</strong>
+            <span>${escapeHtml(player.notes || '-')}</span>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+
+function closePlayerDetail(event) {
+
+  if (event && event.target !== event.currentTarget) {
+    return;
+  }
+
+  const modal =
+    document.getElementById('playerDetailModal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
 
 function filterPlayers() {
 
