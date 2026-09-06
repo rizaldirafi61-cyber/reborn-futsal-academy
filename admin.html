@@ -6,6 +6,98 @@
   <title>Dashboard Admin - Reborn Futsal Academy</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* MODAL DETAIL PEMAIN */
+    #playerDetailModal .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+
+    #playerDetailModal .modal-content {
+      width: min(700px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    #playerDetailModal .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    #playerDetailModal .modal-header h2 {
+      margin: 0;
+    }
+
+    #playerDetailModal .modal-close {
+      border: none;
+      background: #f1f3f2;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #playerDetailModal .modal-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    #playerDetailModal .modal-detail-grid > div {
+      padding: 15px;
+      background: #f7f9f8;
+      border-radius: 12px;
+    }
+
+    #playerDetailModal .modal-detail-grid strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #68736d;
+    }
+
+    #playerDetailModal .modal-detail-grid span {
+      display: block;
+      font-weight: 600;
+      color: #17201b;
+      word-break: break-word;
+    }
+
+    #playerDetailModal .modal-detail-grid .full-width {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 600px) {
+      #playerDetailModal .modal-content {
+        padding: 18px;
+        border-radius: 15px;
+      }
+
+      #playerDetailModal .modal-detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #playerDetailModal .modal-detail-grid .full-width {
+        grid-column: auto;
+      }
+    }
+  </style>
+
 </head>
 
 <body class="admin-page">
@@ -872,7 +964,7 @@ document.getElementById('totalU17').textContent =
   data.filter(player => player.program === 'U17').length;
   if (data.length === 0) {
     table.innerHTML =
-      '<tr><td colspan="9">Belum ada data pendaftar.</td></tr>';
+      '<tr><td colspan="10">Belum ada data pendaftar.</td></tr>';
     return;
   }
 
@@ -970,6 +1062,12 @@ document.getElementById('totalU17').textContent =
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
 
     <button
+      class="btn small"
+      onclick="viewAdminPlayerDetail('${player.id}')">
+      👁️ Detail
+    </button>
+
+    <button
       class="btn primary small"
       onclick="editPlayer('${player.id}')">
       Edit
@@ -1034,6 +1132,127 @@ document.getElementById('totalU17').textContent =
 /* =========================
    CEGAH HTML INJECTION
 ========================= */
+
+
+/* =========================
+   DETAIL PEMAIN ADMIN
+========================= */
+async function viewAdminPlayerDetail(playerId) {
+
+  const { data: player, error } = await supabaseClient
+    .from('players')
+    .select('*')
+    .eq('id', playerId)
+    .single();
+
+  if (error) {
+    console.error('Gagal mengambil detail pemain:', error);
+    alert('Gagal memuat detail pemain: ' + error.message);
+    return;
+  }
+
+  const tanggalDaftar = player.join_date || player.created_at
+    ? new Date(player.join_date || player.created_at).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      })
+    : '-';
+
+  const tanggalLahir = player.birth_date
+    ? new Date(player.birth_date).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      })
+    : '-';
+
+  const status = player.registration_status || player.status || 'Menunggu';
+
+  const modal = document.createElement('div');
+  modal.id = 'playerDetailModal';
+
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="closeAdminPlayerDetail(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>👤 Detail Pemain</h2>
+
+          <button
+            class="modal-close"
+            onclick="closeAdminPlayerDetail()">
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-detail-grid">
+
+          <div>
+            <strong>Nama Lengkap</strong>
+            <span>${escapeHtml(player.full_name || '-')}</span>
+          </div>
+
+          <div>
+            <strong>WhatsApp</strong>
+            <span>${escapeHtml(player.phone || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Tanggal Lahir</strong>
+            <span>${tanggalLahir}</span>
+          </div>
+
+          <div>
+            <strong>Posisi</strong>
+            <span>${escapeHtml(player.position || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Nomor Punggung</strong>
+            <span>${escapeHtml(player.jersey_number ?? '-')}</span>
+          </div>
+
+          <div>
+            <strong>Program</strong>
+            <span>${escapeHtml(player.program || '-')}</span>
+          </div>
+
+          <div>
+            <strong>Tanggal Daftar</strong>
+            <span>${tanggalDaftar}</span>
+          </div>
+
+          <div>
+            <strong>Status</strong>
+            <span>${escapeHtml(status)}</span>
+          </div>
+
+          <div class="full-width">
+            <strong>Catatan</strong>
+            <span>${escapeHtml(player.notes || '-')}</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+function closeAdminPlayerDetail(event) {
+
+  if (event && event.target !== event.currentTarget) {
+    return;
+  }
+
+  const modal = document.getElementById('playerDetailModal');
+
+  if (modal) {
+    modal.remove();
+  }
+}
 
 async function updateRegistrationStatus(playerId, status) {
 
