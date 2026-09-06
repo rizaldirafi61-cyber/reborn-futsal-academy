@@ -200,10 +200,10 @@
     <form id="registrationForm" onsubmit="registerDemo(event)">
       
       <label for="fullName" style="font-weight:700; display:block; margin-bottom:5px;">Nama Lengkap <span style="color:red;">*</span></label>
-      <input id="fullName" required placeholder="Contoh: Zaky Al Hafiz" style="width:100%; margin-bottom:15px;">
+      <input id="fullName" name="full_name" required placeholder="Contoh: Zaky Al Hafiz" style="width:100%; margin-bottom:15px;">
 
       <label for="phone" style="font-weight:700; display:block; margin-bottom:5px;">Nomor WhatsApp <span style="color:red;">*</span></label>
-      <input id="phone" required type="tel" placeholder="Contoh: 083893319340" style="width:100%; margin-bottom:15px;">
+      <input id="phone" name="phone" required type="tel" placeholder="Contoh: 083893319340" style="width:100%; margin-bottom:15px;">
 
       <label for="program" style="font-weight:700; display:block; margin-bottom:5px;">Kelompok Umur <span style="color:red;">*</span></label>
       <select id="program" name="program" required style="width:100%; margin-bottom:15px;">
@@ -215,7 +215,7 @@
       </select>
 
       <label for="jerseyNumber" style="font-weight:700; display:block; margin-bottom:5px;">Nomor Jersey <span style="color:red;">*</span></label>
-      <input type="number" id="jerseyNumber" name="jerseyNumber" placeholder="Contoh: 10" min="1" max="99" required style="width:100%; margin-bottom:15px;">
+      <input type="number" id="jerseyNumber" name="jersey_number" placeholder="Contoh: 10" min="1" max="99" required style="width:100%; margin-bottom:15px;">
 
       <label for="position" style="font-weight:700; display:block; margin-bottom:5px;">Posisi Bermain <span style="color:red;">*</span></label>
       <select id="position" name="position" required style="width:100%; margin-bottom:15px;">
@@ -227,11 +227,11 @@
       </select>
 
       <label for="kkFile" style="font-weight:700; display:block; margin-bottom:5px;">Kartu Keluarga (KK) <span style="color:red;">*</span></label>
-      <input id="kkFile" required type="file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%; margin-bottom:5px;">
+      <input id="kkFile" name="kk_file" required type="file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%; margin-bottom:5px;">
       <small class="form-note" style="display:block; margin-bottom:15px;">Format: PDF, JPG, JPEG, PNG. Maksimal 5 MB.</small>
 
       <label for="aktaFile" style="font-weight:700; display:block; margin-bottom:5px;">Akta Kelahiran <span style="color:red;">*</span></label>
-      <input id="aktaFile" required type="file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%; margin-bottom:5px;">
+      <input id="aktaFile" name="akta_file" required type="file" accept=".pdf,.jpg,.jpeg,.png" style="width:100%; margin-bottom:5px;">
       <small class="form-note" style="display:block; margin-bottom:15px;">Format: PDF, JPG, JPEG, PNG. Maksimal 5 MB.</small>
 
       <button class="btn primary full" type="submit" style="margin-top:10px;">
@@ -314,13 +314,18 @@ async function registerDemo(e) {
 
     const full_name = safeTrim(fullNameElement.value);
     const phone = safeTrim(phoneElement.value);
-    const program = safeTrim(programElement.value);
+    const program = safeTrim(programElement.value).toUpperCase();
     const jersey_number = jerseyNumberElement.value ? Number(jerseyNumberElement.value) : null;
     const position = safeTrim(positionElement.value);
 
+    // Debug log: tampilkan nilai yang dibaca saat submit (hapus setelah selesai debugging)
+    console.debug('DEBUG - form values:', { full_name, phone, program, jersey_number, position });
+
     if (!full_name) throw new Error('Nama lengkap wajib diisi.');
     if (!phone) throw new Error('Nomor WhatsApp wajib diisi.');
-    if (!['U14', 'U15', 'U16', 'U17'].includes(program)) throw new Error('Kelompok umur wajib dipilih.');
+    if (!program) throw new Error('Kelompok umur wajib dipilih.');
+    // Kalau Anda ingin validasi ketat terhadap daftar yang diterima, aktifkan baris berikut:
+    if (!['U14', 'U15', 'U16', 'U17'].includes(program)) throw new Error('Kelompok umur tidak valid.');
     if (!position) throw new Error('Posisi wajib dipilih.');
     if (!jersey_number || jersey_number < 1 || jersey_number > 99) throw new Error('Nomor jersey wajib diisi (1-99).');
 
