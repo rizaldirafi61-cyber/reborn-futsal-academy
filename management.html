@@ -785,6 +785,11 @@ const endDate =
   });
 
   (attendance || []).forEach(record => {
+    const trainingDate =
+  record.training_schedules?.training_date;
+
+if (startDate && trainingDate < startDate) return;
+if (endDate && trainingDate > endDate) return;
     if (!summary[record.player_id]) return;
 
     if (record.attendance_status === 'Hadir') {
