@@ -708,12 +708,9 @@ async function loadFeaturedPlayers() {
 
   if (!container) return;
 
-  const { data, error } = await supabaseClient
-    .from('players')
-    .select('full_name, position, jersey_number, photo_url')
-    .eq('status', 'Aktif')
-    .order('created_at', { ascending: false })
-    .limit(4);
+ const { data, error } = await supabaseClient
+  .from('featured_players')
+  .select('full_name, position, jersey_number, photo_url');
 
   if (error) {
     console.error('Gagal memuat pemain pilihan:', error);
