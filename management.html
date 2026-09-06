@@ -767,7 +767,35 @@ async function logout() {
     }
   });
 
-  table.innerHTML = Object.values(summary).map(player => {
+  const searchInput = document.getElementById('attendanceSearch');
+const programFilter = document.getElementById('attendanceProgramFilter');
+
+function renderAttendanceSummary() {
+  const searchText = (searchInput?.value || '').toLowerCase().trim();
+  const selectedProgram = programFilter?.value || '';
+
+  const filteredPlayers = Object.values(summary).filter(player => {
+    const matchesName =
+      player.full_name.toLowerCase().includes(searchText);
+
+    const matchesProgram =
+      !selectedProgram || player.program === selectedProgram;
+
+    return matchesName && matchesProgram;
+  });
+
+  if (filteredPlayers.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-message">
+          Pemain tidak ditemukan.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  table.innerHTML = filteredPlayers.map(player => {
     const totalDiisi = player.hadir + player.tidakHadir;
 
     const percentage = totalDiisi > 0
@@ -785,6 +813,12 @@ async function logout() {
       </tr>
     `;
   }).join('');
+}
+
+renderAttendanceSummary();
+
+searchInput?.addEventListener('input', renderAttendanceSummary);
+programFilter?.addEventListener('change', renderAttendanceSummary);
 }
 async function loadSchedules() {
   const table = document.getElementById('scheduleTable');
