@@ -992,8 +992,9 @@ const belumDiisiCount = (players || []).filter(
 
 
 if (allowed) {
-  await loadPlayers();
-  await loadSchedules();
+ await loadPlayers();
+await loadSchedules();
+await loadAttendanceSummary();
 }
 
 })();
