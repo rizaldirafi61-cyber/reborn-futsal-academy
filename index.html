@@ -354,25 +354,23 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Menyimpan data pendaftar...';
 
-    const { data: player, error: playerError } = await supabaseClient
-      .from('players')
-      .insert([{ 
-        full_name, 
-        phone, 
-        program,
-        jersey_number, 
-        position 
-      }])
-      .select()
-      .single();
+  const playerId = crypto.randomUUID();
 
-    if (playerError) {
-      console.error('Player error:', playerError);
-      throw new Error('Gagal menyimpan data pemain: ' + playerError.message);
-    }
-    if (!player || !player.id) throw new Error('Data pemain berhasil dibuat tetapi ID tidak ditemukan.');
+const { error: playerError } = await supabaseClient
+  .from('players')
+  .insert([{
+    id: playerId,
+    full_name,
+    phone,
+    program,
+    jersey_number,
+    position
+  }]);
 
-    const playerId = player.id;
+if (playerError) {
+  console.error('Player error:', playerError);
+  throw new Error('Gagal menyimpan data pemain: ' + playerError.message);
+}
 
     status.textContent = '⏳ Mengunggah dokumen KK...';
     const kkExtension = getFileExtension(kkFile.name);
