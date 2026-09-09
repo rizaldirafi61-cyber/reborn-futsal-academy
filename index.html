@@ -354,23 +354,25 @@ async function registerDemo(e) {
 
     status.textContent = '⏳ Menyimpan data pendaftar...';
 
-  const playerId = crypto.randomUUID();
+    const { data: player, error: playerError } = await supabaseClient
+      .from('players')
+      .insert([{ 
+        full_name, 
+        phone, 
+        program,
+        jersey_number, 
+        position 
+      }])
+      .select()
+      .single();
 
-const { error: playerError } = await supabaseClient
-  .from('players')
-  .insert([{
-    id: playerId,
-    full_name,
-    phone,
-    program,
-    jersey_number,
-    position
-  }]);
+    if (playerError) {
+      console.error('Player error:', playerError);
+      throw new Error('Gagal menyimpan data pemain: ' + playerError.message);
+    }
+    if (!player || !player.id) throw new Error('Data pemain berhasil dibuat tetapi ID tidak ditemukan.');
 
-if (playerError) {
-  console.error('Player error:', playerError);
-  throw new Error('Gagal menyimpan data pemain: ' + playerError.message);
-}
+    const playerId = player.id;
 
     status.textContent = '⏳ Mengunggah dokumen KK...';
     const kkExtension = getFileExtension(kkFile.name);
@@ -455,7 +457,7 @@ async function loadPublicSchedules() {
 
       const item = document.createElement('div');
       item.className = 'schedule-item';
-      item.innerHTML = '<div class="date"><b>' + date + '</b></div><div><small>PROGRAM ' + (schedule.program || '') + '</small><h3>Latihan ' + (schedule.program || '') + '</h3><p>📍 ' + (schedule.location || 'Lokasi belum ditentukan') + ' &nbsp; • &nbsp; 🕐 ' + start + '–' + end + '</p>' + (schedule.notes ? '<p>' + schedule.notes + '</p>' : '') + '</div><span class="pill">Terjadwal</span>';
+      item.innerHTML = '<div class="date"><b>' + date + '</b></div><div><small>PROGRAM ' + (schedule.program === 'SEMUA' ? 'SEMUA KELOMPOK UMUR' : (schedule.program || '')) + '</small><h3>Latihan ' + (schedule.program === 'SEMUA' ? 'SEMUA KELOMPOK UMUR' : (schedule.program || '')) + '</h3><p>📍 ' + (schedule.location || 'Lokasi belum ditentukan') + ' &nbsp; • &nbsp; 🕐 ' + start + '–' + end + '</p>' + (schedule.notes ? '<p>' + schedule.notes + '</p>' : '') + '</div><span class="pill">Terjadwal</span>';
       scheduleList.appendChild(item);
     });
   } catch (error) {
