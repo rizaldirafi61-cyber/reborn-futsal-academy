@@ -387,6 +387,7 @@
 
       <select id="scheduleProgram" required>
   <option value="">Pilih kelompok umur</option>
+  <option value="SEMUA">Semua Kelompok Umur</option>
   <option value="U14">U14</option>
   <option value="U15">U15</option>
   <option value="U16">U16</option>
@@ -1414,7 +1415,7 @@ async function loadSchedules() {
   if (endTime === null) return;
 
   const program = prompt(
-    'Kelompok umur (U14, U15, U16, atau U17):',
+    'Kelompok umur (Semua, U14, U15, U16, atau U17):',
     schedule.program || ''
   );
 
@@ -1436,8 +1437,8 @@ async function loadSchedules() {
 
   const cleanProgram = program.toUpperCase().trim();
 
-  if (!['U14', 'U15', 'U16', 'U17'].includes(cleanProgram)) {
-    alert('Kelompok umur harus U14, U15, U16, atau U17.');
+  if (!['SEMUA', 'U14', 'U15', 'U16', 'U17'].includes(cleanProgram)) {
+    alert('Kelompok umur harus Semua, U14, U15, U16, atau U17.');
     return;
   }
 
@@ -1721,12 +1722,16 @@ async function openAttendance(scheduleId) {
 
     if (scheduleError) throw scheduleError;
 
+    let playersQuery = supabaseClient
+      .from('players')
+      .select('id, full_name, program, status');
+
+    if (schedule.program !== 'SEMUA') {
+      playersQuery = playersQuery.eq('program', schedule.program);
+    }
+
     const { data: players, error: playersError } =
-      await supabaseClient
-        .from('players')
-        .select('id, full_name, program, status')
-        .eq('program', schedule.program)
-        .order('full_name');
+      await playersQuery.order('full_name');
 
     if (playersError) throw playersError;
 
@@ -1751,7 +1756,7 @@ async function openAttendance(scheduleId) {
       rows = `
         <tr>
           <td colspan="4" style="text-align:center;padding:25px;">
-            Belum ada pemain pada program ${schedule.program}.
+            Belum ada pemain pada program ${schedule.program === 'SEMUA' ? 'Semua Kelompok Umur' : schedule.program}.
           </td>
         </tr>
       `;
@@ -1825,7 +1830,7 @@ async function openAttendance(scheduleId) {
 
               <p>
                 Program:
-                <strong>${schedule.program}</strong>
+                <strong>${schedule.program === 'SEMUA' ? 'Semua Kelompok Umur' : schedule.program}</strong>
               </p>
             </div>
 
